@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from db.database import get_db
 from schemas.common import CommonResponse
-from .schema import VendorCreate, VendorResponse
+from .schema import VendorCreate, VendorUpdate, VendorResponse
 from . import crud
 
 router = APIRouter()
@@ -35,11 +35,12 @@ async def search_vendors(query: str, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=CommonResponse[VendorResponse], status_code=status.HTTP_201_CREATED)
 async def create_vendor(vendor: VendorCreate, db: Session = Depends(get_db)):
-    # Template 존재 확인
-    from domains.template import crud as template_crud
-    template = template_crud.get_template(db, template_id=vendor.template)
-    if not template:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
+    # Template 존재 확인 (template이 제공된 경우에만)
+    if vendor.template is not None:
+        from domains.template import crud as template_crud
+        template = template_crud.get_template(db, template_id=vendor.template)
+        if not template:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
     
     db_vendor = crud.create_vendor(db=db, vendor=vendor)
     return CommonResponse(data=VendorResponse.model_validate(db_vendor))
@@ -48,26 +49,22 @@ async def create_vendor(vendor: VendorCreate, db: Session = Depends(get_db)):
 @router.put("/{vendor_id}", response_model=CommonResponse[VendorResponse])
 async def update_vendor(
     vendor_id: int,
-    name: Optional[str] = None,
-    tel: Optional[str] = None,
-    range: Optional[str] = None,
-    template: Optional[int] = None,
+    vendor: VendorUpdate,
     db: Session = Depends(get_db)
 ):
-    if template:
-        # Template 존재 확인
+    update_data = vendor.model_dump(exclude_unset=True)
+    
+    if 'template' in update_data and update_data['template'] is not None:
+        # Template 존재 확인 (template이 None이 아닌 경우에만)
         from domains.template import crud as template_crud
-        template_obj = template_crud.get_template(db, template_id=template)
+        template_obj = template_crud.get_template(db, template_id=update_data['template'])
         if not template_obj:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
     
     db_vendor = crud.update_vendor(
         db=db,
         vendor_id=vendor_id,
-        name=name,
-        tel=tel,
-        range=range,
-        template=template
+        **update_data
     )
     if not db_vendor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vendor not found")

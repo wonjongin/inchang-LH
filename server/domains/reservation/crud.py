@@ -4,15 +4,15 @@ from models.models import Reservation, Complex, Vendor
 from .schema import ReservationCreate
 
 
-def create_reservation(db: Session, reservation: ReservationCreate) -> Reservation:
+def create_reservation(db: Session, reservation: ReservationCreate, user_id: int) -> Reservation:
     db_reservation = Reservation(
         cotis=reservation.cotis,
         complex_id=reservation.location,
         vendor_id=reservation.vendor,
         template_id=reservation.template,
-        user_id=reservation.author,
+        user_id=user_id,
         reserved_at=reservation.reserved_at,
-        completed_at=reservation.completed_at,
+        # completed_at=reservation.completed_at,
         is_transfered=reservation.is_transfered,
         description=reservation.description
     )

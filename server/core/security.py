@@ -38,11 +38,26 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-def verify_token(token: str):
+def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+def verify_token(token: str) -> Optional[dict]:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload
-    except JWTError:
+    except JWTError as e:
+        # 디버깅을 위한 로깅
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"JWT verification failed: {str(e)}")
         return None
 
 
@@ -53,6 +68,8 @@ async def get_current_user(
     """JWT 토큰에서 현재 사용자를 가져옵니다."""
     # 순환 import 방지를 위해 함수 내부에서 import
     from domains.user import crud as user_crud
+    import logging
+    logger = logging.getLogger(__name__)
     
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -60,16 +77,30 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     
-    payload = verify_token(token)
-    if payload is None:
+    # 토큰이 None이거나 빈 문자열인지 확인
+    if not token:
+        logger.error("Token is missing or empty")
         raise credentials_exception
     
-    user_id: Optional[int] = payload.get("sub")
-    if user_id is None:
+    payload = verify_token(token)
+    if payload is None:
+        logger.error(f"Token verification failed for token: {token[:20]}...")
+        raise credentials_exception
+    
+    user_id_str: Optional[str] = payload.get("sub")
+    if user_id_str is None:
+        logger.error(f"User ID not found in token payload: {payload}")
+        raise credentials_exception
+    
+    try:
+        user_id = int(user_id_str)
+    except (ValueError, TypeError):
+        logger.error(f"Invalid user ID format in token: {user_id_str}")
         raise credentials_exception
     
     user = user_crud.get_user(db, user_id=user_id)
     if user is None:
+        logger.error(f"User not found in database for user_id: {user_id}")
         raise credentials_exception
     
     return user

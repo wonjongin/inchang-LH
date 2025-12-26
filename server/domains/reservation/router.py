@@ -4,8 +4,10 @@ from typing import List, Optional
 from datetime import date
 from db.database import get_db
 from schemas.common import CommonResponse
-from .schema import ReservationCreate, ReservationResponse
+from .schema import ReservationCreate, ReservationUpdate, ReservationResponse
 from . import crud
+from models.models import User
+from core.security import get_current_user
 
 router = APIRouter()
 
@@ -53,11 +55,11 @@ async def search_reservations(query: str, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=CommonResponse[ReservationResponse], status_code=status.HTTP_201_CREATED)
-async def create_reservation(reservation: ReservationCreate, db: Session = Depends(get_db)):
+async def create_reservation(reservation: ReservationCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # COTIS 중복 체크
     existing = crud.get_reservation_by_cotis(db, cotis=reservation.cotis)
     if existing:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="COTIS already exists")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="COTIS 번호가 이미 존재합니다.")
     
     # 관련 엔티티 존재 확인
     from domains.complex import crud as complex_crud
@@ -71,9 +73,7 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vendor not found")
     
     from domains.user import crud as user_crud
-    user = user_crud.get_user(db, user_id=reservation.author)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    user = user_crud.get_user(db, user_id=current_user.id)
     
     if reservation.template:
         from domains.template import crud as template_crud
@@ -81,67 +81,53 @@ async def create_reservation(reservation: ReservationCreate, db: Session = Depen
         if not template:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
     
-    db_reservation = crud.create_reservation(db=db, reservation=reservation)
+    db_reservation = crud.create_reservation(db=db, reservation=reservation, user_id=current_user.id)
     return CommonResponse(data=ReservationResponse.model_validate(db_reservation))
 
 
 @router.put("/{reservation_id}", response_model=CommonResponse[ReservationResponse])
 async def update_reservation(
     reservation_id: int,
-    cotis: Optional[str] = None,
-    location: Optional[int] = None,
-    vendor: Optional[int] = None,
-    template: Optional[int] = None,
-    author: Optional[int] = None,
-    reserved_at: Optional[date] = None,
-    completed_at: Optional[date] = None,
-    is_transfered: Optional[bool] = None,
-    description: Optional[str] = None,
+    reservation: ReservationUpdate,
     db: Session = Depends(get_db)
 ):
+    update_data = reservation.model_dump(exclude_unset=True)
+    
     # COTIS 중복 체크 (다른 예약과 중복되지 않는지)
-    if cotis:
-        existing = crud.get_reservation_by_cotis(db, cotis=cotis)
+    if 'cotis' in update_data:
+        existing = crud.get_reservation_by_cotis(db, cotis=update_data['cotis'])
         if existing and existing.id != reservation_id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="COTIS already exists")
     
     # 관련 엔티티 존재 확인
-    if location:
+    if 'location' in update_data and update_data['location'] is not None:
         from domains.complex import crud as complex_crud
-        complex = complex_crud.get_complex(db, complex_id=location)
+        complex = complex_crud.get_complex(db, complex_id=update_data['location'])
         if not complex:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complex not found")
     
-    if vendor:
+    if 'vendor' in update_data and update_data['vendor'] is not None:
         from domains.vendor import crud as vendor_crud
-        vendor_obj = vendor_crud.get_vendor(db, vendor_id=vendor)
+        vendor_obj = vendor_crud.get_vendor(db, vendor_id=update_data['vendor'])
         if not vendor_obj:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vendor not found")
     
-    if author:
+    if 'author' in update_data and update_data['author'] is not None:
         from domains.user import crud as user_crud
-        user = user_crud.get_user(db, user_id=author)
+        user = user_crud.get_user(db, user_id=update_data['author'])
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
-    if template:
+    if 'template' in update_data and update_data['template'] is not None:
         from domains.template import crud as template_crud
-        template_obj = template_crud.get_template(db, template_id=template)
+        template_obj = template_crud.get_template(db, template_id=update_data['template'])
         if not template_obj:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
     
     db_reservation = crud.update_reservation(
         db=db,
         reservation_id=reservation_id,
-        cotis=cotis,
-        location=location,
-        vendor=vendor,
-        template=template,
-        author=author,
-        reserved_at=reserved_at,
-        completed_at=completed_at,
-        is_transfered=is_transfered,
-        description=description
+        **update_data
     )
     if not db_reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")

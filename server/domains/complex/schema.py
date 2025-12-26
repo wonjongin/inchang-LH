@@ -12,6 +12,13 @@ class ComplexBase(BaseModel):
 class ComplexCreate(ComplexBase):
     pass
 
+class ComplexUpdate(BaseModel):
+    name: Optional[str] = None
+    address: Optional[str] = None
+    tel: Optional[str] = None
+    fax: Optional[str] = None
+    email: Optional[str] = None
+
 class ComplexResponse(ComplexBase):
     id: int
     

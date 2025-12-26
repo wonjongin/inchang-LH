@@ -8,7 +8,7 @@ def create_vendor(db: Session, vendor: VendorCreate) -> Vendor:
     db_vendor = Vendor(
         name=vendor.name,
         tel=vendor.tel,
-        control_range=vendor.range,
+        control_range=vendor.control_range,
         template_id=vendor.template
     )
     db.add(db_vendor)
@@ -30,14 +30,14 @@ def get_vendors(db: Session, skip: int = 0, limit: int = 100, template_id: Optio
 
 def search_vendors(db: Session, query: str) -> List[Vendor]:
     return db.query(Vendor).filter(Vendor.name.ilike(f"%{query}%")).order_by(Vendor.name.asc()).all()
-    
+
 
 def update_vendor(db: Session, vendor_id: int, **kwargs) -> Optional[Vendor]:
     db_vendor = get_vendor(db, vendor_id)
     if not db_vendor:
         return None
-    if 'range' in kwargs:
-        kwargs['control_range'] = kwargs.pop('range')
+    if 'control_range' in kwargs:
+        kwargs['control_range'] = kwargs.pop('control_range')
     if 'template' in kwargs:
         kwargs['template_id'] = kwargs.pop('template')
     for key, value in kwargs.items():

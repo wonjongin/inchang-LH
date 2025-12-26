@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from db.database import get_db
 from schemas.common import CommonResponse
-from .schema import ComplexCreate, ComplexResponse
+from .schema import ComplexCreate, ComplexUpdate, ComplexResponse
 from . import crud
 
 router = APIRouter()
@@ -38,21 +38,13 @@ async def create_complex(complex: ComplexCreate, db: Session = Depends(get_db)):
 @router.put("/{complex_id}", response_model=CommonResponse[ComplexResponse])
 async def update_complex(
     complex_id: int,
-    name: Optional[str] = None,
-    address: Optional[str] = None,
-    tel: Optional[str] = None,
-    fax: Optional[str] = None,
-    email: Optional[str] = None,
+    complex: ComplexUpdate,
     db: Session = Depends(get_db)
 ):
     db_complex = crud.update_complex(
         db=db,
         complex_id=complex_id,
-        name=name,
-        address=address,
-        tel=tel,
-        fax=fax,
-        email=email
+        **complex.model_dump(exclude_unset=True)
     )
     if not db_complex:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complex not found")
