@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import date
+from pathlib import Path
 from db.database import get_db
 from schemas.common import CommonResponse
 from .schema import ReservationCreate, ReservationUpdate, ReservationResponse
@@ -143,3 +145,29 @@ async def delete_reservation(reservation_id: int, db: Session = Depends(get_db))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
     return CommonResponse(data={"deleted": True})
 
+
+@router.get("/{reservation_id}/generate-certificate-template")
+async def generate_certificate_template(reservation_id: int, db: Session = Depends(get_db)):
+    reservation = crud.get_reservation(db, reservation_id=reservation_id)
+    if not reservation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
+    if not reservation.template_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
+    from domains.template import util as template_util
+    from domains.template import crud as template_crud
+    template = template_crud.get_template(db, template_id=reservation.template_id)
+    if not template:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
+    template_util.generate_certificate_template(template, reservation)
+    
+    # 생성된 파일 경로
+    file_path = Path(f"data/certificates_template/{reservation_id}.xlsx")
+    if not file_path.exists():
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="File generation failed")
+    
+    # 파일 다운로드 응답
+    return FileResponse(
+        path=str(file_path),
+        filename=f"완료확인양식_{reservation.cotis}.xlsx",
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )

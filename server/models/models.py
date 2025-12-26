@@ -46,14 +46,7 @@ class Template(Base):
     
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    cotis_cell = Column(String(6), nullable=True)
-    cotis_fmt = Column(String, nullable=True)
-    reserved_at_cell = Column(String(6), nullable=True)
-    reserved_at_fmt = Column(String, nullable=True)
-    address_cell = Column(String(6), nullable=True)
-    address_fmt = Column(String, nullable=True)
-    description_cell = Column(String(6), nullable=True)
-    descriprion_fmt = Column(String, nullable=True)
+    fmt = Column(String, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.now)
     updated_at = Column(DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     

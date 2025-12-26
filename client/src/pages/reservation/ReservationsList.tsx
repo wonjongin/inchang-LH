@@ -75,6 +75,7 @@ export default function ReservationsList() {
                     <Column field="reserved_at" header="접수일" />
                     <Column field="completed_at" header="완료일" />
                     <Column field="is_transfered" header="이관" body={(rowData) => rowData.is_transfered ? 'Y' : 'N'} />
+                    <Column field="generate_certificate_template" header="양식" align="center" body={(rowData) => <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${rowData.id}/generate-certificate-template`} download={true}>🖨️</a>} />
                     <Column field="edit" header="수정" align="center" />
                     <Column field="delete" header="삭제" align="center" />
                 </DataTable> )}

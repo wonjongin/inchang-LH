@@ -56,8 +56,8 @@ export default function ReservationsEdit() {
                 location_name: selectedReservation.location.name,
                 vendor: selectedReservation.vendor.id,
                 vendor_name: selectedReservation.vendor.name,
-                template: selectedReservation.template || null,
-                template_name: selectedReservation.template ? templates.find(t => t.id === selectedReservation.template)?.name || '' : '',
+                template: selectedReservation.template?.id || 0,
+                template_name: selectedReservation.template?.name || '',
                 completed_at: selectedReservation.completed_at || null,
             })
         }

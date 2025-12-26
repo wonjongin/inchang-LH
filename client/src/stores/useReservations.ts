@@ -16,7 +16,10 @@ export interface Reservation {
     id: number
     name: string
   }
-  template?: number | null
+  template?: {
+    id: number
+    name: string
+  } | null
   author: {
     id: number
     name: string

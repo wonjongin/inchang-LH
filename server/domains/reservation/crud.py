@@ -81,18 +81,45 @@ def search_reservations(db: Session, query: str) -> List[Reservation]:
     ).order_by(Reservation.cotis.asc()).all()
 
 def update_reservation(db: Session, reservation_id: int, **kwargs) -> Optional[Reservation]:
+    from datetime import datetime, date
+    
     db_reservation = get_reservation(db, reservation_id)
     if not db_reservation:
         return None
+    
+    # 필드명 변환 (API 필드명 -> DB 컬럼명)
     if 'location' in kwargs:
         kwargs['complex_id'] = kwargs.pop('location')
     if 'vendor' in kwargs:
         kwargs['vendor_id'] = kwargs.pop('vendor')
     if 'author' in kwargs:
         kwargs['user_id'] = kwargs.pop('author')
+    if 'template' in kwargs:
+        kwargs['template_id'] = kwargs.pop('template')
+    
+    # 날짜 필드 변환 (문자열 또는 date 객체를 date 객체로)
+    if 'reserved_at' in kwargs:
+        if kwargs['reserved_at'] is not None:
+            if isinstance(kwargs['reserved_at'], str):
+                kwargs['reserved_at'] = datetime.strptime(kwargs['reserved_at'], '%Y-%m-%d').date()
+            elif isinstance(kwargs['reserved_at'], date):
+                pass  # 이미 date 객체
+    if 'completed_at' in kwargs:
+        if kwargs['completed_at'] is not None:
+            if isinstance(kwargs['completed_at'], str):
+                kwargs['completed_at'] = datetime.strptime(kwargs['completed_at'], '%Y-%m-%d').date()
+            elif isinstance(kwargs['completed_at'], date):
+                pass  # 이미 date 객체
+    
+    # 외래 키 필드만 업데이트 (관계 필드가 아닌)
+    allowed_fields = ['cotis', 'complex_id', 'vendor_id', 'template_id', 'user_id', 
+                      'reserved_at', 'completed_at', 'is_transfered', 'description']
+    
     for key, value in kwargs.items():
-        if value is not None:
-            setattr(db_reservation, key, value)
+        if key in allowed_fields:
+            if value is not None or key in ['completed_at', 'description']:  # None 허용 필드
+                setattr(db_reservation, key, value)
+    
     db.commit()
     db.refresh(db_reservation)
     return db_reservation
