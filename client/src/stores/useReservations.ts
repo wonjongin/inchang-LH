@@ -40,7 +40,7 @@ interface ReservationsState {
   error: string | null
   
   // Actions
-  fetchReservations: (skip?: number, limit?: number, filters?: { user_id?: number, complex_id?: number, vendor_id?: number }) => Promise<void>
+  fetchReservations: (skip?: number, limit?: number, filters?: { user_id?: number, complex_id?: number, vendor_id?: number }, filter?: string) => Promise<void>
   fetchReservation: (id: number) => Promise<void>
   searchReservations: (query: string) => Promise<void>
   createReservation: (reservation: ReservationCreate) => Promise<void>
@@ -56,14 +56,15 @@ export const useReservations = create<ReservationsState>((set) => ({
   loading: false,
   error: null,
 
-  fetchReservations: async (skip = 0, limit = 100, filters = {}) => {
+  fetchReservations: async (skip = 0, limit = 100, filters = {}, filter = 'all') => {
     set({ loading: true, error: null })
     try {
       const params: any = { skip, limit }
       if (filters.user_id) params.user_id = filters.user_id
       if (filters.complex_id) params.complex_id = filters.complex_id
       if (filters.vendor_id) params.vendor_id = filters.vendor_id
-      
+      if (filter) params.filter = filter
+
       const response = await apiGetWithAuth('/api/v1/reservations', params)
       console.log('fetchReservations', response)
       if (response.success) {

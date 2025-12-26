@@ -12,6 +12,7 @@ import ReservationsList from './pages/reservation/ReservationsList'
 import ReservationsNew from './pages/reservation/ReservationsNew'
 import ReservationsEdit from './pages/reservation/ReservationsEdit'
 import './App.css'
+import 'primereact/resources/themes/nano/theme.css'
 
 function App() {
   return (

@@ -2,9 +2,10 @@ import Navbar from "../../components/Navbar";
 import * as stylex from '@stylexjs/stylex'
 import { DataTable } from 'primereact/datatable'
 import { useReservations } from '../../stores/useReservations'
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Column } from "primereact/column";
 import Loading from "../../components/Loading";
+import { SelectButton } from "primereact/selectbutton";
 
 const styles = stylex.create({
     page: {
@@ -20,9 +21,17 @@ const styles = stylex.create({
 
 export default function ReservationsList() {
     const { reservations, loading, error, fetchReservations, deleteReservation } = useReservations()
+    const [selectedStatus, setSelectedStatus] = useState('all')
+    const selectedStatusOptions = [
+        { label: '전체', value: 'all' },
+        { label: '진행중', value: 'progressing' },
+        { label: '완료', value: 'completed' },
+    ]
     useEffect(() => {
-        fetchReservations()
-    }, [])
+        fetchReservations(0, 100, {}, selectedStatus)
+    }, [selectedStatus])
+
+
     if (error) {
         return <div>Error: {error}</div>
     }
@@ -31,6 +40,13 @@ export default function ReservationsList() {
             <Navbar />
                 <div {...stylex.props(styles.content)}>
                 <h1>접수 목록</h1>
+                <SelectButton 
+                    value={selectedStatus} 
+                    onChange={(e) => setSelectedStatus(e.value)} 
+                    options={selectedStatusOptions} 
+                    className="mb-2"
+                />
+                <br />
                 {loading ? <Loading /> : (
                 <DataTable value={reservations.map((reservation) => ({
                     ...reservation,

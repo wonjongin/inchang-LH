@@ -16,6 +16,7 @@ router = APIRouter()
 async def get_reservations(
     skip: int = 0,
     limit: int = 100,
+    filter: Optional[str] = None,
     user_id: Optional[int] = None,
     complex_id: Optional[int] = None,
     vendor_id: Optional[int] = None,
@@ -26,6 +27,7 @@ async def get_reservations(
         skip=skip,
         limit=limit,
         user_id=user_id,
+        filter=filter,
         complex_id=complex_id,
         vendor_id=vendor_id
     )

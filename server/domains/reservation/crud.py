@@ -36,7 +36,8 @@ def get_reservations(
     limit: int = 100,
     user_id: Optional[int] = None,
     complex_id: Optional[int] = None,
-    vendor_id: Optional[int] = None
+    vendor_id: Optional[int] = None,
+    filter: Optional[str] = None
 ) -> List[Reservation]:
     query = db.query(Reservation)
     if user_id:
@@ -45,6 +46,14 @@ def get_reservations(
         query = query.filter(Reservation.complex_id == complex_id)
     if vendor_id:
         query = query.filter(Reservation.vendor_id == vendor_id)
+
+    if filter == 'all':
+        pass
+    elif filter == 'progressing':
+        query = query.filter(Reservation.completed_at == None)
+    elif filter == 'completed':
+        query = query.filter(Reservation.completed_at != None)
+
     return query.offset(skip).limit(limit).all()
 
 
