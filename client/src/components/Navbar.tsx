@@ -16,19 +16,6 @@ export default function Navbar() {
 
   const items: MenuItem[] = [
     {
-      label: '홈',
-      icon: 'pi pi-home',
-      items: [
-        {
-          label: '홈',
-          icon: 'pi pi-home',
-          command: () => {
-            navigate('/dashboard')
-          },
-        },
-      ],
-    },
-    {
       label: '접수',
       icon: 'pi pi-calendar',
       items: [
@@ -49,7 +36,7 @@ export default function Navbar() {
       ],
     },
     {
-      label: '단지 관리',
+      label: '단지',
       icon: 'pi pi-building',
       items: [
         {
@@ -69,7 +56,7 @@ export default function Navbar() {
       ],
     },
     {
-      label: '업체 관리',
+      label: '업체',
       icon: 'pi pi-building',
       items: [
         {
@@ -89,7 +76,7 @@ export default function Navbar() {
       ],
     },
     {
-      label: '템플릿 관리',
+      label: '템플릿',
       icon: 'pi pi-file',
       items: [
         {
@@ -113,7 +100,7 @@ export default function Navbar() {
   const start = (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
       <i className="pi pi-building" style={{ fontSize: '1.5rem' }}></i>
-      <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>인창 LH 관리 시스템</span>
+      <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>인창 LH 시스템</span>
     </div>
   )
 

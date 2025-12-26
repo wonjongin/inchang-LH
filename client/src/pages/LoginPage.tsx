@@ -102,7 +102,7 @@ export default function LoginPage() {
         localStorage.setItem('accessTokenExpiredAt', response.data.accessTokenExpiredAt)
         localStorage.setItem('refreshToken', response.data.refreshToken)
         localStorage.setItem('refreshTokenExpiredAt', response.data.refreshTokenExpiredAt)
-        navigate('/dashboard')
+        navigate('/reservations/list')
       } else {
         setError(response.message || '로그인에 실패했습니다.')
       }

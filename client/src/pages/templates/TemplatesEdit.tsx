@@ -111,7 +111,7 @@ export default function TemplatesEdit() {
                         setSelectedFile(file)
                     }}
                     auto
-                    chooseLabel="파일 선택 (선택사항)"
+                    chooseLabel={selectedFile ? selectedFile.name : "파일 선택 (선택사항)"}
                     className="w-full"
                 />
             ),

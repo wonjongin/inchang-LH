@@ -110,7 +110,7 @@ const styles = stylex.create({
         fontWeight: 500,
         color: '#333',
         fontSize: '0.9rem',
-        minWidth: '120px',
+        minWidth: '80px',
         textAlign: 'justify',
         textAlignLast: 'justify',
     },

@@ -71,7 +71,7 @@ export default function TemplatesNew() {
                         setSelectedFile(file)
                     }}
                     auto
-                    chooseLabel="파일 선택"
+                    chooseLabel={selectedFile ? selectedFile.name : "파일 선택"}
                     className="w-full"
                 />
             ),

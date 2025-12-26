@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
+import os
+import shutil
 from db.database import get_db
 from schemas.common import CommonResponse
 from .schema import ReservationCreate, ReservationUpdate, ReservationResponse
@@ -171,3 +173,56 @@ async def generate_certificate_template(reservation_id: int, db: Session = Depen
         filename=f"완료확인양식_{reservation.cotis}.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+@router.post("/{reservation_id}/complete", response_model=CommonResponse[ReservationResponse])
+async def complete_reservation(
+    reservation_id: int,
+    completed_at: Optional[str] = Form(None),
+    certificate: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db)
+):
+    reservation = crud.get_reservation(db, reservation_id=reservation_id)
+    if not reservation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
+    
+    # 완료일 처리
+    update_data = {}
+    if completed_at:
+        try:
+            update_data['completed_at'] = datetime.strptime(completed_at, '%Y-%m-%d').date()
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid date format. Use YYYY-MM-DD")
+    
+    # PDF 파일 저장
+    if certificate and certificate.filename:
+        # 업로드 디렉토리 생성
+        upload_dir = Path("data/certificates")
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        
+        # 파일 저장
+        file_path = upload_dir / f"{reservation_id}.pdf"
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(certificate.file, buffer)
+    
+    # 예약 정보 업데이트
+    if update_data:
+        db_reservation = crud.update_reservation(
+            db=db,
+            reservation_id=reservation_id,
+            **update_data
+        )
+        if not db_reservation:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
+        return CommonResponse(data=ReservationResponse.model_validate(db_reservation))
+    
+    return CommonResponse(data=ReservationResponse.model_validate(reservation))
+
+@router.get("/{reservation_id}/generate-certificate")
+async def generate_certificate(reservation_id: int, db: Session = Depends(get_db)):
+    reservation = crud.get_reservation(db, reservation_id=reservation_id)
+    if not reservation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
+    file_path = Path(f"data/certificates/{reservation_id}.pdf")
+    if not file_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Certificate not found")
+    return FileResponse(path=str(file_path), filename=f"완료확인서_{reservation.cotis}.pdf", media_type="application/pdf")
