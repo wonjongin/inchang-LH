@@ -44,6 +44,7 @@ interface ReservationsState {
   
   // Actions
   fetchReservations: (skip?: number, limit?: number, filters?: { user_id?: number, complex_id?: number, vendor_id?: number }, filter?: string) => Promise<void>
+  fetchReservationsByMonth: (year: number, month: number, filter?: string) => Promise<void>
   fetchReservation: (id: number) => Promise<void>
   searchReservations: (query: string) => Promise<void>
   createReservation: (reservation: ReservationCreate) => Promise<void>
@@ -74,6 +75,23 @@ export const useReservations = create<ReservationsState>((set) => ({
         set({ reservations: response.data, loading: false })
       } else {
         set({ error: response.message || '접수 목록을 불러오는데 실패했습니다.', loading: false })
+      }
+    } catch (error: any) {
+      set({ 
+        error: error.response?.data?.detail || '서버에 연결할 수 없습니다.', 
+        loading: false 
+      })
+    }
+  },
+
+  fetchReservationsByMonth: async (year: number, month: number, filter = 'all') => {
+    set({ loading: true, error: null })
+    try {
+      const response = await apiGetWithAuth(`/api/v1/reservations/by-month/${year}/${month}`, { filter })
+      if (response.success) {
+        set({ reservations: response.data, loading: false })
+      } else {
+        set({ error: response.message || '월별 접수 목록을 불러오는데 실패했습니다.', loading: false })
       }
     } catch (error: any) {
       set({ 

@@ -4,7 +4,6 @@ import { useReservations, type ReservationCreate } from '../../stores/useReserva
 import { useComplexes } from '../../stores/useComplexes';
 import { useVendors } from '../../stores/useVendors';
 import { useTemplates } from '../../stores/useTemplates';   
-import { InputText } from "primereact/inputtext";
 import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -14,6 +13,7 @@ import { validateCotisWithMessage } from "../../utils/validations";
 import { useNavigate } from "react-router-dom";
 import { AutoComplete } from "primereact/autocomplete";
 import { disassemble } from "es-hangul";
+import { InputMask } from "primereact/inputmask";
 
 export default function ReservationsNew() {
     const { createReservation } = useReservations()
@@ -75,12 +75,13 @@ export default function ReservationsNew() {
             label: 'COTIS',
             id: 'cotis',
             input: (
-                <InputText 
+                <InputMask
                     id="cotis" 
                     value={formData.cotis} 
-                    onChange={(e) => setFormData({ ...formData, cotis: e.target.value })} 
+                    onChange={(e) => setFormData({ ...formData, cotis: e.target.value || '' })} 
                     placeholder="COTIS를 입력하세요 (예: 000000-00-00000)" 
                     className="w-full" 
+                    mask="999999-99-99999"
                     style={{ width: '100%', maxWidth: 'none' }} 
                     invalid={!!validateCotisWithMessage(formData.cotis || '')}
                     required 

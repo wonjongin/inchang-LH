@@ -58,16 +58,24 @@ def get_reservations(
     return query.order_by(Reservation.cotis.desc()).offset(skip).limit(limit).all()
 
 
-def get_reservations_by_month(db: Session, year: int, month: int) -> List[Reservation]:
-    return db.query(Reservation).options(
+def get_reservations_by_month(db: Session, year: int, month: int, filter: Optional[str] = None) -> List[Reservation]:
+    query = db.query(Reservation).options(
         joinedload(Reservation.location),
         joinedload(Reservation.vendor),
         joinedload(Reservation.template),
         joinedload(Reservation.author)
-    ).filter(
+    )
+    if filter == 'all':
+        pass
+    elif filter == 'progressing':
+        query = query.filter(Reservation.completed_at == None)
+    elif filter == 'completed':
+        query = query.filter(Reservation.completed_at != None)   
+    query = query.filter(
         extract('year', Reservation.reserved_at) == year,
         extract('month', Reservation.reserved_at) == month
-    ).order_by(Reservation.reserved_at.asc()).all()
+    )
+    return query.order_by(Reservation.reserved_at.asc()).all()
 
 def get_reservations_by_year(db: Session, year: int) -> List[Reservation]:
     return db.query(Reservation).options(

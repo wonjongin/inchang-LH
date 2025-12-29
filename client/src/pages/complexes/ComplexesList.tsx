@@ -5,6 +5,8 @@ import { useComplexes } from '../../stores/useComplexes'
 import { useEffect } from "react";
 import { Column } from "primereact/column";
 import Loading from "../../components/Loading";
+import { Button } from "primereact/button";
+import { useNavigate } from "react-router-dom";
 
 const styles = stylex.create({
     page: {
@@ -20,6 +22,7 @@ const styles = stylex.create({
 
 export default function ComplexesList() {
     const { complexes, loading, error, fetchComplexes } = useComplexes()
+    const navigate = useNavigate()
     useEffect(() => {
         fetchComplexes()
     }, [])
@@ -31,6 +34,10 @@ export default function ComplexesList() {
             <Navbar />
             <div {...stylex.props(styles.content)}>
             <h1>단지 목록</h1>
+            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem' }}>
+                <Button icon="pi pi-plus" label="단지 등록" onClick={() => navigate('/complexes/new')} />
+            </div>
+            <br />
             {loading ? <Loading /> : (
             <DataTable value={complexes.map((complex) => ({
                 ...complex,

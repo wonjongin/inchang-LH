@@ -40,6 +40,11 @@ async def get_reservations(
     return CommonResponse(data=[ReservationResponse.model_validate(r) for r in reservations])
 
 
+@router.get("/by-month/{year}/{month}", response_model=CommonResponse[List[ReservationResponse]])
+async def get_reservations_by_month(year: int, month: int, filter: Optional[str] = None, db: Session = Depends(get_db)):
+    reservations = crud.get_reservations_by_month(db, year=year, month=month, filter=filter)
+    return CommonResponse(data=[ReservationResponse.model_validate(r) for r in reservations])
+
 @router.get("/{reservation_id}", response_model=CommonResponse[ReservationResponse])
 async def get_reservation(reservation_id: int, db: Session = Depends(get_db)):
     reservation = crud.get_reservation(db, reservation_id=reservation_id)

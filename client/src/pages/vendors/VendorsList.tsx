@@ -5,6 +5,8 @@ import { useVendors } from '../../stores/useVendors'
 import { useEffect } from "react";
 import { Column } from "primereact/column";
 import Loading from "../../components/Loading";
+import { Button } from "primereact/button";
+import { useNavigate } from "react-router-dom";
 
 const styles = stylex.create({
     page: {
@@ -20,6 +22,7 @@ const styles = stylex.create({
 
 export default function VendorsList() {
     const { vendors, loading, error, fetchVendors, deleteVendor } = useVendors()
+    const navigate = useNavigate()
     useEffect(() => {
         fetchVendors()
     }, [])
@@ -31,6 +34,10 @@ export default function VendorsList() {
             <Navbar />
                 <div {...stylex.props(styles.content)}>
                 <h1>업체 목록</h1>
+                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem' }}>
+                    <Button icon="pi pi-plus" label="업체 등록" onClick={() => navigate('/vendors/new')} />
+                </div>
+                <br />
                 {loading ? <Loading /> : (
                 <DataTable value={vendors.map((vendor) => ({
                     ...vendor,

@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import { Column } from "primereact/column";
 import Loading from "../../components/Loading";
 import { SelectButton } from "primereact/selectbutton";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+import { useNavigate } from "react-router-dom";
 
 const styles = stylex.create({
     page: {
@@ -20,16 +23,19 @@ const styles = stylex.create({
   })
 
 export default function ReservationsList() {
-    const { reservations, loading, error, fetchReservations, deleteReservation } = useReservations()
+    const { reservations, loading, error, fetchReservationsByMonth, deleteReservation } = useReservations()
     const [selectedStatus, setSelectedStatus] = useState('all')
+    const [year, setYear] = useState(new Date().getFullYear())
+    const [month, setMonth] = useState(new Date().getMonth() + 1)
     const selectedStatusOptions = [
         { label: '전체', value: 'all' },
         { label: '진행중', value: 'progressing' },
         { label: '완료', value: 'completed' },
     ]
+    const navigate = useNavigate()
     useEffect(() => {
-        fetchReservations(0, 100, {}, selectedStatus)
-    }, [selectedStatus])
+        fetchReservationsByMonth(year, month, selectedStatus)
+    }, [selectedStatus, year, month])
 
 
     if (error) {
@@ -40,12 +46,37 @@ export default function ReservationsList() {
             <Navbar />
                 <div {...stylex.props(styles.content)}>
                 <h1>접수 목록</h1>
-                <SelectButton 
-                    value={selectedStatus} 
-                    onChange={(e) => setSelectedStatus(e.value)} 
-                    options={selectedStatusOptions} 
-                    className="mb-2"
-                />
+                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                    <div className="p-inputgroup" style={{ width: '300px' }}>
+                        <Button icon="pi pi-chevron-left" onClick={() => {
+                            if (month > 1) {
+                                setMonth(month - 1)
+                            } else {
+                                setYear(year - 1)
+                                setMonth(12)
+                            }
+                        }} />
+                        <InputText type="number" value={year.toString()} onChange={(e) => setYear(Number(e.target.value))} style={{ textAlign: 'right' }} />
+                        <span className="p-inputgroup-addon">년</span>
+                        <InputText type="number" value={`${month}`} onChange={(e) => setMonth(Number(e.target.value))} style={{ textAlign: 'right' }} />
+                        <span className="p-inputgroup-addon">월</span>
+                        <Button icon="pi pi-chevron-right" onClick={() => {
+                            if (month < 12) {
+                                setMonth(month + 1)
+                            } else {
+                                setYear(year + 1)
+                                setMonth(1)
+                            }
+                        }} />
+                    </div>
+                    <SelectButton
+                        value={selectedStatus} 
+                        onChange={(e) => setSelectedStatus(e.value)} 
+                        options={selectedStatusOptions} 
+                        style={{ width: '170px' }}
+                    />
+                    <Button icon="pi pi-plus" label="접수 등록" onClick={() => navigate('/reservations/new')} />
+                </div>
                 <br />
                 {loading ? <Loading /> : (
                 <DataTable value={reservations.map((reservation) => ({
@@ -60,7 +91,7 @@ export default function ReservationsList() {
                             deleteReservation(reservation.id)
                                 .then(() => {
                                     alert('접수 삭제가 완료되었습니다.')
-                                    fetchReservations()
+                                    fetchReservationsByMonth(year, month, selectedStatus)
                                 })
                                 .catch((error) => {
                                     alert(error.message)
