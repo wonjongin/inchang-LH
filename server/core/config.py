@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 30
     ADMIN_PW: str = "admin_pw"
+    HOST_URL: str = "http://localhost:8000"
 
     class Config:
         env_file = ".env"

@@ -29,7 +29,7 @@ else:
         CORSMiddleware,
         allow_origins=[
             "http://localhost:3000",
-            "https://your-production-domain.com",  # 프로덕션 도메인으로 변경 필요
+            settings.HOST_URL,
         ],
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
