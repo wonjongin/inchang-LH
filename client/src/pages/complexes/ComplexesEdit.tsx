@@ -1,6 +1,6 @@
 import Navbar from "../../components/Navbar";
 import * as stylex from '@stylexjs/stylex';
-import { useComplexes, type Complex, type ComplexCreate } from '../../stores/useComplexes';
+import { useComplexes, type ComplexCreate } from '../../stores/useComplexes';
 import { InputText } from "primereact/inputtext";
 import { useEffect, useState } from "react";
 import FormBasic, { type FormField } from "../../components/FormBasic";

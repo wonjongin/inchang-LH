@@ -4,8 +4,6 @@ import { DataTable } from 'primereact/datatable'
 import { useComplexes } from '../../stores/useComplexes'
 import { useEffect } from "react";
 import { Column } from "primereact/column";
-import { Button } from "primereact/button";
-import { useNavigate } from "react-router-dom";
 import Loading from "../../components/Loading";
 
 const styles = stylex.create({
@@ -21,8 +19,7 @@ const styles = stylex.create({
   })
 
 export default function ComplexesList() {
-    const { complexes, loading, error, fetchComplexes, deleteComplex } = useComplexes()
-    const navigate = useNavigate()
+    const { complexes, loading, error, fetchComplexes } = useComplexes()
     useEffect(() => {
         fetchComplexes()
     }, [])

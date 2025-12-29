@@ -4,7 +4,6 @@ import { DataTable } from 'primereact/datatable'
 import { useTemplates } from '../../stores/useTemplates'
 import { useEffect } from "react";
 import { Column } from "primereact/column";
-import { useNavigate } from "react-router-dom";
 import Loading from "../../components/Loading";
 
 const styles = stylex.create({
@@ -21,7 +20,6 @@ const styles = stylex.create({
 
 export default function TemplatesList() {
     const { templates, loading, error, fetchTemplates, deleteTemplate } = useTemplates()
-    const navigate = useNavigate()
     useEffect(() => {
         fetchTemplates()
     }, [fetchTemplates])
