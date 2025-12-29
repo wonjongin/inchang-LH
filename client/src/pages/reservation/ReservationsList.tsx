@@ -9,6 +9,7 @@ import { SelectButton } from "primereact/selectbutton";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
+import { useUsers } from "../../stores/useUsers";
 
 const styles = stylex.create({
     page: {
@@ -24,6 +25,7 @@ const styles = stylex.create({
 
 export default function ReservationsList() {
     const { reservations, loading, error, fetchReservationsByMonth, deleteReservation } = useReservations()
+    const { me, fetchMe } = useUsers()
     const [selectedStatus, setSelectedStatus] = useState('all')
     const [year, setYear] = useState(new Date().getFullYear())
     const [month, setMonth] = useState(new Date().getMonth() + 1)
@@ -33,6 +35,10 @@ export default function ReservationsList() {
         { label: '완료', value: 'completed' },
     ]
     const navigate = useNavigate()
+
+    useEffect(() => {
+        fetchMe()
+    }, [])
     useEffect(() => {
         fetchReservationsByMonth(year, month, selectedStatus)
     }, [selectedStatus, year, month])
@@ -46,7 +52,7 @@ export default function ReservationsList() {
             <Navbar />
                 <div {...stylex.props(styles.content)}>
                 <h1>접수 목록</h1>
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem' }}>
                     <div className="p-inputgroup" style={{ width: '300px' }}>
                         <Button icon="pi pi-chevron-left" onClick={() => {
                             if (month > 1) {
@@ -112,7 +118,9 @@ export default function ReservationsList() {
                     <Column field="generate_certificate_template" header="양식" align="center" body={(rowData) => <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${rowData.id}/generate-certificate-template`} download={true}>🖨️</a>} />
                     <Column field="complete" header="완료" align="center" />
                     <Column field="edit" header="수정" align="center" />
-                    <Column field="delete" header="삭제" align="center" />
+                    {me?.permission === 1 && (
+                        <Column field="delete" header="삭제" align="center" />
+                    )}
                 </DataTable> )}
             </div>
         </div>

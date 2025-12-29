@@ -5,6 +5,8 @@ from db.database import get_db
 from schemas.common import CommonResponse
 from .schema import VendorCreate, VendorUpdate, VendorResponse
 from . import crud
+from models.models import Permission, User
+from core.security import get_current_user
 
 router = APIRouter()
 
@@ -72,7 +74,9 @@ async def update_vendor(
 
 
 @router.delete("/{vendor_id}", response_model=CommonResponse[dict])
-async def delete_vendor(vendor_id: int, db: Session = Depends(get_db)):
+async def delete_vendor(vendor_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.permission != Permission.ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="관리자만 삭제할 수 있습니다.")
     success = crud.delete_vendor(db=db, vendor_id=vendor_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vendor not found")

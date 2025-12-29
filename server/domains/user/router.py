@@ -17,6 +17,11 @@ async def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_d
     users = crud.get_users(db, skip=skip, limit=limit)
     return CommonResponse(data=[UserResponse.model_validate(user) for user in users])
 
+@router.get("/me", response_model=CommonResponse[UserResponse])
+async def get_me(current_user: User = Depends(get_current_user)):
+    """현재 로그인한 사용자 정보를 가져옵니다."""
+    return CommonResponse(data=UserResponse.model_validate(current_user))
+
 
 @router.get("/{user_id}", response_model=CommonResponse[UserResponse])
 async def get_user(user_id: int, db: Session = Depends(get_db)):
@@ -24,12 +29,6 @@ async def get_user(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="사용자를 찾을 수 없습니다.")
     return CommonResponse(data=UserResponse.model_validate(user))
-
-@router.get("/me", response_model=CommonResponse[UserResponse])
-async def get_me(current_user: User = Depends(get_current_user)):
-    """현재 로그인한 사용자 정보를 가져옵니다."""
-    return CommonResponse(data=UserResponse.model_validate(current_user))
-
 
 @router.post("/", response_model=CommonResponse[UserResponse], status_code=status.HTTP_201_CREATED)
 async def create_user(user: UserCreate, db: Session = Depends(get_db)):

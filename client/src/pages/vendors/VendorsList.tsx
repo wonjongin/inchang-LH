@@ -8,6 +8,7 @@ import Loading from "../../components/Loading";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
+import { useUsers } from "../../stores/useUsers";
 
 const styles = stylex.create({
     page: {
@@ -23,10 +24,12 @@ const styles = stylex.create({
 
 export default function VendorsList() {
     const { vendors, loading, error, fetchVendors, deleteVendor, searchVendors } = useVendors()
+    const { me, fetchMe } = useUsers()
     const [search, setSearch] = useState('')
     const navigate = useNavigate()
     useEffect(() => {
         fetchVendors()
+        fetchMe()
     }, [])
     if (error) {
         return <div>Error: {error}</div>
@@ -81,7 +84,9 @@ export default function VendorsList() {
                     <Column field="control_range" header="관할범위" />
                     <Column field="template" header="템플릿 ID" />
                     <Column field="edit" header="수정" align="center" />
-                    <Column field="delete" header="삭제" align="center" />
+                    {me?.permission === 1 && (
+                        <Column field="delete" header="삭제" align="center" />
+                    )}
                 </DataTable> )}
             </div>
         </div>

@@ -4,31 +4,32 @@ import { apiGetWithAuth } from '../services/apiService'
 export interface User {
   id: number
   name: string
+  permission: number
 }
 
 interface UsersState {
-  users: User[]
+  me: User | null
   loading: boolean
   error: string | null
   
   // Actions
-  fetchUsers: (skip?: number, limit?: number) => Promise<void>
+  fetchMe: () => Promise<void>
   clearError: () => void
 }
 
 export const useUsers = create<UsersState>((set) => ({
-  users: [],
+  me: null,
   loading: false,
   error: null,
 
-  fetchUsers: async (skip = 0, limit = 100) => {
+  fetchMe: async () => {
     set({ loading: true, error: null })
     try {
-      const response = await apiGetWithAuth('/api/v1/users', { skip, limit })
+      const response = await apiGetWithAuth('/api/v1/users/me')
       if (response.success) {
-        set({ users: response.data, loading: false })
+        set({ me: response.data, loading: false })
       } else {
-        set({ error: response.message || '사용자 목록을 불러오는데 실패했습니다.', loading: false })
+        set({ error: response.message || '내 정보를 불러오는데 실패했습니다.', loading: false })
       }
     } catch (error: any) {
       set({ 

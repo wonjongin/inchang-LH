@@ -10,11 +10,11 @@ from db.database import get_db
 from schemas.common import CommonResponse
 from .schema import ReservationCreate, ReservationUpdate, ReservationResponse
 from . import crud
-from models.models import User
+from models.models import Permission, User
 from core.security import get_current_user
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
-from .util import get_color_by_int
+from .util import get_color_by_int, year_to_yearcode
 router = APIRouter()
 
 
@@ -148,7 +148,9 @@ async def update_reservation(
 
 
 @router.delete("/{reservation_id}", response_model=CommonResponse[dict])
-async def delete_reservation(reservation_id: int, db: Session = Depends(get_db)):
+async def delete_reservation(reservation_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.permission != Permission.ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="관리자만 삭제할 수 있습니다.")
     success = crud.delete_reservation(db=db, reservation_id=reservation_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
@@ -177,7 +179,7 @@ async def generate_certificate_template(reservation_id: int, db: Session = Depen
     # 파일 다운로드 응답
     return FileResponse(
         path=str(file_path),
-        filename=f"완료확인양식_{reservation.cotis}.xlsx",
+        filename=f"{year_to_yearcode(reservation.reserved_at.year)}{reservation.reserved_at.strftime('%m%d')}-완료확인양식-{reservation.vendor.name}-{reservation.location.name}-{reservation.description[:50]}.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
@@ -232,7 +234,7 @@ async def generate_certificate(reservation_id: int, db: Session = Depends(get_db
     file_path = Path(f"data/certificates/{reservation_id}.pdf")
     if not file_path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Certificate not found")
-    return FileResponse(path=str(file_path), filename=f"완료확인서_{reservation.cotis}.pdf", media_type="application/pdf")
+    return FileResponse(path=str(file_path), filename=f"{year_to_yearcode(reservation.reserved_at.year)}{reservation.reserved_at.strftime('%m%d')}-완료확인-{reservation.vendor.name}-{reservation.location.name}-{reservation.description[:50]}.pdf", media_type="application/pdf")
 
 @router.get("/get-reservations/{year}")
 async def get_reservations_by_year(year: int, db: Session = Depends(get_db)) -> FileResponse:

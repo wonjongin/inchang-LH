@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from core.security import get_current_user
+from models.models import Permission, User
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from db.database import get_db
@@ -52,7 +54,9 @@ async def update_complex(
 
 
 @router.delete("/{complex_id}", response_model=CommonResponse[dict])
-async def delete_complex(complex_id: int, db: Session = Depends(get_db)):
+async def delete_complex(complex_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.permission != Permission.ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="관리자만 삭제할 수 있습니다.")
     success = crud.delete_complex(db=db, complex_id=complex_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complex not found")

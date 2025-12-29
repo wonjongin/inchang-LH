@@ -8,6 +8,7 @@ import Loading from "../../components/Loading";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
+import { useUsers } from "../../stores/useUsers";
 
 const styles = stylex.create({
     page: {
@@ -22,11 +23,13 @@ const styles = stylex.create({
   })
 
 export default function ComplexesList() {
-    const { complexes, loading, error, fetchComplexes, searchComplexes } = useComplexes()
+    const { complexes, loading, error, fetchComplexes, searchComplexes, deleteComplex } = useComplexes()
+    const { me, fetchMe } = useUsers()
     const [search, setSearch] = useState('')
     const navigate = useNavigate()
     useEffect(() => {
-        fetchComplexes()
+        fetchComplexes();
+        fetchMe()
     }, [])
     if (error) {
         return <div>Error: {error}</div>
@@ -60,7 +63,19 @@ export default function ComplexesList() {
             <DataTable value={complexes.map((complex) => ({
                 ...complex,
                 edit: <a href={`/complexes/edit/${complex.id}`}>📝</a>,
-                delete: <a href={`/complexes/delete/${complex.id}`}>🗑️</a>,
+                delete:<a href={`/complexes/delete/${complex.id}`} onClick={(e) => {
+                    e.preventDefault()
+                    if (confirm('정말 삭제하시겠습니까?')) {
+                        deleteComplex(complex.id)
+                            .then(() => {
+                                alert('단지 삭제가 완료되었습니다.')
+                                fetchComplexes()
+                            })
+                            .catch((error) => {
+                                alert(error.message)
+                            })
+                    }
+                }}>🗑️</a> ,
             }))} size="small" stripedRows showGridlines>
                 <Column field="name" header="단지 이름" />
                 <Column field="address" header="주소" />
@@ -68,7 +83,8 @@ export default function ComplexesList() {
                 <Column field="fax" header="팩스" />
                 <Column field="email" header="이메일" />
                 <Column field="edit" header="수정" align="center" />
-                <Column field="delete" header="삭제" align="center" />
+                {me?.permission === 1 && (
+                    <Column field="delete" header="삭제" align="center" /> )}
             </DataTable> )}
             </div>
         </div>

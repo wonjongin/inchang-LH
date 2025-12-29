@@ -1,6 +1,14 @@
 import colorsys
 
 
+def year_to_yearcode(year: int) -> str:
+    # 2025 -> L
+    # 2026 -> M
+    # 2027 -> N
+
+    return chr(ord('A') + year - 2014)
+    
+
 def get_color_by_int(index: int) -> str:
     """
     바탕색으로 쓰기 좋은 색 256개 중 인덱스에 해당하는 색을 반환합니다.
