@@ -6,6 +6,9 @@ import os
 from alembic import context
 from db.base import Base
 
+# Import all models so that Base.metadata has all table information
+from models.models import User, Complex, Template, Vendor, Reservation  # noqa
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
