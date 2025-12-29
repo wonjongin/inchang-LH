@@ -2,11 +2,12 @@ import Navbar from "../../components/Navbar";
 import * as stylex from '@stylexjs/stylex'
 import { DataTable } from 'primereact/datatable'
 import { useComplexes } from '../../stores/useComplexes'
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Column } from "primereact/column";
 import Loading from "../../components/Loading";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
+import { InputText } from "primereact/inputtext";
 
 const styles = stylex.create({
     page: {
@@ -21,7 +22,8 @@ const styles = stylex.create({
   })
 
 export default function ComplexesList() {
-    const { complexes, loading, error, fetchComplexes } = useComplexes()
+    const { complexes, loading, error, fetchComplexes, searchComplexes } = useComplexes()
+    const [search, setSearch] = useState('')
     const navigate = useNavigate()
     useEffect(() => {
         fetchComplexes()
@@ -29,12 +31,28 @@ export default function ComplexesList() {
     if (error) {
         return <div>Error: {error}</div>
     }
+
+    const handleSearch = () => {
+        if (search.length > 0) {
+            searchComplexes(search)
+        } else {
+            fetchComplexes()
+        }
+    }
     return (
         <div {...stylex.props(styles.page)}>
             <Navbar />
             <div {...stylex.props(styles.content)}>
             <h1>단지 목록</h1>
             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem' }}>
+                <div className="p-inputgroup" style={{ width: '300px' }}>
+                    <InputText placeholder="검색" value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleSearch()
+                        }
+                    }} />
+                    <Button icon="pi pi-search" onClick={handleSearch} />
+                </div>
                 <Button icon="pi pi-plus" label="단지 등록" onClick={() => navigate('/complexes/new')} />
             </div>
             <br />
