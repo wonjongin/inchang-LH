@@ -33,6 +33,13 @@ export default function Navbar() {
             navigate('/reservations/new')
           },
         },
+        {
+          label: '올해 목록 다운로드',
+          icon: 'pi pi-download',
+          command: () => {
+            window.open(`${import.meta.env.VITE_API_URL}/api/v1/reservations/get-reservations/${new Date().getFullYear()}`, '_blank')
+          },
+        },
       ],
     },
     {

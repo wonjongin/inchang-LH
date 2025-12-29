@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import extract
 from typing import List, Optional
 from models.models import Reservation, Complex, Vendor
 from .schema import ReservationCreate
@@ -54,14 +55,29 @@ def get_reservations(
     elif filter == 'completed':
         query = query.filter(Reservation.completed_at != None)
 
-    return query.offset(skip).limit(limit).all()
+    return query.order_by(Reservation.cotis.desc()).offset(skip).limit(limit).all()
 
 
 def get_reservations_by_month(db: Session, year: int, month: int) -> List[Reservation]:
-    return db.query(Reservation).filter(Reservation.reserved_at.year == year, Reservation.reserved_at.month == month).order_by(Reservation.reserved_at.asc()).all()
+    return db.query(Reservation).options(
+        joinedload(Reservation.location),
+        joinedload(Reservation.vendor),
+        joinedload(Reservation.template),
+        joinedload(Reservation.author)
+    ).filter(
+        extract('year', Reservation.reserved_at) == year,
+        extract('month', Reservation.reserved_at) == month
+    ).order_by(Reservation.reserved_at.asc()).all()
 
 def get_reservations_by_year(db: Session, year: int) -> List[Reservation]:
-    return db.query(Reservation).filter(Reservation.reserved_at.year == year).order_by(Reservation.reserved_at.asc()).all()
+    return db.query(Reservation).options(
+        joinedload(Reservation.location),
+        joinedload(Reservation.vendor),
+        joinedload(Reservation.template),
+        joinedload(Reservation.author)
+    ).filter(
+        extract('year', Reservation.reserved_at) == year
+    ).order_by(Reservation.reserved_at.asc()).all()
 
 def search_reservations(db: Session, query: str) -> List[Reservation]:
     """예약 검색 (단지명, 벤더명, 설명으로 검색)"""

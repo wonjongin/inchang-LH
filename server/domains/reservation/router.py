@@ -12,7 +12,9 @@ from .schema import ReservationCreate, ReservationUpdate, ReservationResponse
 from . import crud
 from models.models import User
 from core.security import get_current_user
-
+from openpyxl import Workbook
+from openpyxl.styles import PatternFill
+from .util import get_color_by_int
 router = APIRouter()
 
 
@@ -226,3 +228,38 @@ async def generate_certificate(reservation_id: int, db: Session = Depends(get_db
     if not file_path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Certificate not found")
     return FileResponse(path=str(file_path), filename=f"완료확인서_{reservation.cotis}.pdf", media_type="application/pdf")
+
+@router.get("/get-reservations/{year}")
+async def get_reservations_by_year(year: int, db: Session = Depends(get_db)) -> FileResponse:
+    reservations = crud.get_reservations_by_year(db, year=year)
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "예약 목록"
+    sheet.cell(row=1, column=1, value="접수일")
+    sheet.cell(row=1, column=2, value="접수번호") # COTIS
+    sheet.cell(row=1, column=3, value="완료일")
+    sheet.cell(row=1, column=4, value="업체")
+    sheet.cell(row=1, column=5, value="현장명")
+    sheet.cell(row=1, column=6, value="연락처") # 현장 연락처
+    sheet.cell(row=1, column=7, value="접수/작업내용")
+    
+    for i, reservation in enumerate(reservations, start=2):
+        if not reservation.is_transfered:
+            fill_color = PatternFill(start_color=get_color_by_int(i), end_color=get_color_by_int(i), fill_type="solid")
+        else:
+            fill_color = PatternFill(start_color="A6A6A6", end_color="A6A6A6", fill_type="solid")
+        sheet.cell(row=i, column=1, value=reservation.reserved_at.strftime('%Y-%m-%d')).fill = fill_color
+        sheet.cell(row=i, column=2, value=reservation.cotis).fill = fill_color
+        sheet.cell(row=i, column=3, value=reservation.completed_at.strftime('%m.%d') if reservation.completed_at else "").fill = fill_color
+        sheet.cell(row=i, column=4, value=reservation.vendor.name).fill = fill_color
+        sheet.cell(row=i, column=5, value=reservation.location.name)
+        sheet.cell(row=i, column=6, value=reservation.location.tel)
+        sheet.cell(row=i, column=7, value=reservation.description)
+    
+    # 디렉토리가 없으면 생성
+    output_dir = Path("data/reservations")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    file_path = output_dir / f"r{year}.xlsx"
+    workbook.save(str(file_path))
+    return FileResponse(path=str(file_path), filename=f"{year}년 LH보수지시내역.xlsx", media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
