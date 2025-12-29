@@ -109,6 +109,7 @@ export default function TemplatesNew() {
                         disabled: false,
                     }}
                 />
+                <p>파일 업로드 시에는 완료확인 양식의 시트 이름을 Sheet1 으로 바꾸고 업로드 해주세요.</p>
                 <p>
                 양식 예시: <br />
                 <span dangerouslySetInnerHTML={{ __html: `A1<br />{{cotis}}<br />B1<br />{{연도}}<br />C1<br />{{월}}<br />D1<br />{{일}}<br />E1<br />{{주소}}<br />F1<br />{{연락처}}<br />G1<br />{{내용}}<br />H1<br />{{단지명}}<br />I1<br />{{업체명}}` }} />
