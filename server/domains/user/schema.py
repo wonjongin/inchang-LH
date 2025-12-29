@@ -6,6 +6,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    admin_pw: str
 
 class UserResponse(UserBase):
     id: int

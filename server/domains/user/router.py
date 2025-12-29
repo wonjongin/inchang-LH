@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from core.config import settings
 from sqlalchemy.orm import Session
 from typing import List
 from db.database import get_db
@@ -21,7 +22,7 @@ async def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_d
 async def get_user(user_id: int, db: Session = Depends(get_db)):
     user = crud.get_user(db, user_id=user_id)
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="사용자를 찾을 수 없습니다.")
     return CommonResponse(data=UserResponse.model_validate(user))
 
 @router.get("/me", response_model=CommonResponse[UserResponse])
@@ -35,8 +36,9 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     # 중복 이름 체크
     existing_user = crud.get_user_by_name(db, name=user.name)
     if existing_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User name already exists")
-    
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="사용자 이름이 이미 존재합니다.")
+    if user.admin_pw != settings.ADMIN_PW:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="관리자 비밀번호가 일치하지 않습니다.")
     db_user = crud.create_user(db=db, user=user)
     return CommonResponse(data=UserResponse.model_validate(db_user))
 
@@ -45,6 +47,6 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
 async def update_user(user_id: int, name: str = None, password: str = None, db: Session = Depends(get_db)):
     db_user = crud.update_user(db=db, user_id=user_id, name=name, password=password)
     if not db_user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="사용자를 찾을 수 없습니다.")
     return CommonResponse(data=UserResponse.model_validate(db_user))
 

@@ -12,6 +12,7 @@ from models.models import User
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto",
+    bcrypt__rounds=12,  # bcrypt 라운드 수 (높을수록 안전하지만 느림, 기본값: 12)
     bcrypt__truncate_error=False  # 72바이트 초과 시 자동으로 잘라냄 (오류 발생 안 함)
 )
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
