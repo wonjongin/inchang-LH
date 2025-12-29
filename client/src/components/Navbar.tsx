@@ -44,7 +44,7 @@ export default function Navbar() {
     },
     {
       label: '단지',
-      icon: 'pi pi-building',
+      icon: 'pi pi-map-marker',
       items: [
         {
           label: '단지 목록',
