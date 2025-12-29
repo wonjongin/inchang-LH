@@ -132,12 +132,16 @@ export default function SignupPage() {
         setSuccess('회원가입이 완료되었습니다!')
         setTimeout(() => {
           navigate('/')
-        }, 1500)
+        }, 1000)
       } else {
         setError(response.message || '회원가입에 실패했습니다.')
       }
-    } catch (err) {
-      setError('서버에 연결할 수 없습니다.')
+    } catch (err: any) {
+      if (err.response.data.detail) {
+        setError(err.response.data.detail)
+      } else {
+        setError('회원가입에 실패했습니다.')
+      }
     } finally {
       setLoading(false)
     }

@@ -37,7 +37,7 @@ export default function ComplexesNew() {
             id: 'name',
             input: (
                 <InputText 
-                    id="name" 
+                    id="complex_name" 
                     value={formData.name} 
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
                     placeholder="단지 이름을 입력하세요" 

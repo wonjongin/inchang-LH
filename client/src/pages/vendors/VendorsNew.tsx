@@ -45,7 +45,7 @@ export default function VendorsNew() {
             id: 'name',
             input: (
                 <InputText 
-                    id="name" 
+                    id="vendor_name" 
                     value={formData.name} 
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
                     placeholder="업체 이름을 입력하세요" 

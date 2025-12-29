@@ -83,18 +83,18 @@ export default function Navbar() {
       ],
     },
     {
-      label: '템플릿',
+      label: '양식',
       icon: 'pi pi-file',
       items: [
         {
-          label: '템플릿 목록',
+          label: '양식 목록',
           icon: 'pi pi-list',
           command: () => {
             navigate('/templates/list')
           },
         },
         {
-          label: '템플릿 등록',
+          label: '양식 등록',
           icon: 'pi pi-file',
           command: () => {
             navigate('/templates/new')

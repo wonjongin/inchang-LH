@@ -22,7 +22,7 @@ export default function TemplatesNew() {
         e.preventDefault()
         console.log(formData)
         if (!formData.name) {
-            alert('템플릿 이름을 입력해주세요.')
+            alert('양식 이름을 입력해주세요.')
             return
         }
         
@@ -33,7 +33,7 @@ export default function TemplatesNew() {
         
         createTemplate(templateData)  
         .then(() => {
-            alert('템플릿 등록이 완료되었습니다.')
+            alert('양식 등록이 완료되었습니다.')
             navigate('/templates/list')
         })
         .catch((error) => {
@@ -44,14 +44,14 @@ export default function TemplatesNew() {
 
     const fields: FormField[] = [
         {
-            label: '템플릿 이름',
+            label: '양식 이름',
             id: 'name',
             input: (
                 <InputText 
-                    id="name" 
+                    id="template_name"
                     value={formData.name} 
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                    placeholder="템플릿 이름을 입력하세요" 
+                    placeholder="양식 이름을 입력하세요" 
                     className="w-full" 
                     style={{ width: '100%', maxWidth: 'none' }} 
                     required 
@@ -81,10 +81,10 @@ export default function TemplatesNew() {
             id: 'fmt',
             input: (
                 <InputTextarea
-                    id="fmt"
+                    id="template_fmt"
                     value={formData.fmt}
                     onChange={(e) => setFormData({ ...formData, fmt: e.target.value })}
-                    placeholder="양식을 입력하세요 (예: A1\n{{cotis}}\nB1\n{{연도}}\nC1\n{{월}}\nD1\n{{일}}\nE1\n{{주소}}\nF1\n{{연락처}}\nG1\n{{내용}}\nH1\n{{단지명}}\nI1\n{{업체명}})"
+                    placeholder="양식을 입력하세요 (예: A1 {{cotis}} B1 {{연도}} C1 {{월}} D1 {{일}} E1 {{주소}} F1 {{연락처}} G1 {{내용}} H1 {{단지명}} I1 {{업체명}})"
                     className="w-full"
                     style={{ width: '100%', maxWidth: 'none', minHeight: '200px' }}
                     required
@@ -97,8 +97,8 @@ export default function TemplatesNew() {
         <div {...stylex.props(styles.page)}>
             <Navbar />
             <div {...stylex.props(styles.content)}>
-                <h1>템플릿 등록</h1>
-                <p>템플릿 등록 페이지입니다.</p>
+                <h1>양식 등록</h1>
+                <p>양식 등록 페이지입니다.</p>
                 <FormBasic 
                     fields={fields}
                     onSubmit={handleSubmit}
@@ -109,6 +109,10 @@ export default function TemplatesNew() {
                         disabled: false,
                     }}
                 />
+                <p>
+                양식 예시: <br />
+                <span dangerouslySetInnerHTML={{ __html: `A1<br />{{cotis}}<br />B1<br />{{연도}}<br />C1<br />{{월}}<br />D1<br />{{일}}<br />E1<br />{{주소}}<br />F1<br />{{연락처}}<br />G1<br />{{내용}}<br />H1<br />{{단지명}}<br />I1<br />{{업체명}}` }} />
+                </p>
             </div>
         </div>
     )

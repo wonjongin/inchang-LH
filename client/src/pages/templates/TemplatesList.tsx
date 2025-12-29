@@ -33,9 +33,9 @@ export default function TemplatesList() {
         <div {...stylex.props(styles.page)}>
             <Navbar />
             <div {...stylex.props(styles.content)}>
-            <h1>템플릿 목록</h1>
+            <h1>양식 목록</h1>
             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem' }}>
-                <Button icon="pi pi-plus" label="템플릿 등록" onClick={() => navigate('/templates/new')} />
+                <Button icon="pi pi-plus" label="양식 등록" onClick={() => navigate('/templates/new')} />
             </div>
             <br />
             {loading ? <Loading /> : (
@@ -47,7 +47,7 @@ export default function TemplatesList() {
                     if (confirm('정말 삭제하시겠습니까?')) {
                         deleteTemplate(template.id)
                             .then(() => {
-                                alert('템플릿 삭제가 완료되었습니다.')
+                                alert('양식 삭제가 완료되었습니다.')
                                 fetchTemplates()
                             })
                             .catch((error) => {
@@ -56,7 +56,7 @@ export default function TemplatesList() {
                     }
                 }}>🗑️</a>,
             }))} size="small" stripedRows showGridlines>
-                <Column field="name" header="템플릿 이름" />
+                <Column field="name" header="양식 이름" />
                 <Column field="fmt" header="형식" />
                 <Column field="edit" header="수정" align="center" />
                 <Column field="delete" header="삭제" align="center" />

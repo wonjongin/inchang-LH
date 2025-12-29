@@ -15,9 +15,9 @@ router = APIRouter()
 async def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = user_crud.get_user_by_name(db, name=request.name)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="이름 또는 비밀번호가 일치하지 않습니다.")
     if not verify_password(request.password, user.password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="이름 또는 비밀번호가 일치하지 않습니다.")
     return CommonResponse(
         data=LoginResponse(
             accessToken=create_access_token({"sub": str(user.id)}), 

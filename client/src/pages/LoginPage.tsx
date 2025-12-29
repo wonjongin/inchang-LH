@@ -106,8 +106,12 @@ export default function LoginPage() {
       } else {
         setError(response.message || '로그인에 실패했습니다.')
       }
-    } catch (err) {
-      setError('서버에 연결할 수 없습니다.')
+    } catch (err: any) {
+      if (err.response.status === 401) {
+        setError(err.response.data.detail)
+      } else {
+        setError('서버에 연결할 수 없습니다.')
+      }
     } finally {
       setLoading(false)
     }
