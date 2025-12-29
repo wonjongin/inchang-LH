@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
+import { addLocale } from 'primereact/api'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import Dashboard from './pages/Dashboard'
@@ -28,6 +29,16 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   
   return <>{children}</>
 }
+
+
+addLocale('ko', {
+    firstDayOfWeek: 0,
+    dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+    dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
+    dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'],
+    monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+    monthNamesShort: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+})
 
 function App() {
   return (

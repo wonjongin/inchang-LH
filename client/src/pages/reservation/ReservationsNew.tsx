@@ -157,6 +157,7 @@ export default function ReservationsNew() {
                     onChange={(e) => setFormData({ ...formData, reserved_at: e.value ? e.value.toISOString().split('T')[0] : '' })} 
                     dateFormat="yy-mm-dd"
                     placeholder="접수일을 선택하세요"
+                    locale="ko"
                     className="w-full" 
                     style={{ width: '100%', maxWidth: 'none' }}
                     required
