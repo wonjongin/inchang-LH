@@ -5,11 +5,12 @@
  * - 00-0000-0000
  * - 000-000-0000
  * - 000-0000-0000
+ * - 위 형식 뒤에 ~0 또는 ~00 추가 가능
  */
 export function validatePhoneNumber(phone: string): boolean {
     if (!phone) return false
     
-    const phoneRegex = /^\d{2,3}-\d{3,4}-\d{4}$/
+    const phoneRegex = /^\d{2,3}-\d{3,4}-\d{4}(~0{1,2})?$/
     return phoneRegex.test(phone)
 }
 
@@ -20,7 +21,7 @@ export function validatePhoneNumber(phone: string): boolean {
 export function validatePhoneNumberWithMessage(phone: string): string {
     if (!phone) return '전화번호를 입력해주세요.'
     if (!validatePhoneNumber(phone)) {
-        return '전화번호 형식이 올바르지 않습니다. (예: 02-123-4567, 010-1234-5678)'
+        return '전화번호 형식이 올바르지 않습니다. (예: 02-123-4567, 010-1234-5678, 02-123-4567~0)'
     }
     return ''
 }
