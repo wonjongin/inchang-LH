@@ -66,10 +66,9 @@ export default function ComplexesList() {
                 <Button icon="pi pi-plus" label="단지 등록" onClick={() => navigate('/complexes/new')} />
             </div>
             <br />
-            <Paginator first={first} rows={complexes.limit} totalRecords={complexes.total} onPageChange={(e) => {
-                setFirst(e.first)
-            }} />
+            
             {loading ? <Loading /> : (
+            <div>
             <DataTable value={complexes.items.map((complex) => ({
                 ...complex,
                 edit: <a href={`/complexes/edit/${complex.id}`}>📝</a>,
@@ -96,6 +95,10 @@ export default function ComplexesList() {
                 {me?.permission === 1 && (
                     <Column field="delete" header="삭제" align="center" /> )}
             </DataTable> 
+            <Paginator first={first} rows={complexes.limit} totalRecords={complexes.total} onPageChange={(e) => {
+                setFirst(e.first)
+            }} />
+            </div>
             )}
             </div>
         </div>
