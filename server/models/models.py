@@ -14,7 +14,7 @@ class User(Base):
     __tablename__ = "user"
     
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     permission = Column(Integer, nullable=False, default=Permission.USER.value)
     is_active = Column(Boolean, nullable=False, default=True)
@@ -29,7 +29,7 @@ class Complex(Base):
     __tablename__ = "complex"
     
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     address = Column(String, nullable=True)
     tel = Column(String, nullable=True)
     fax = Column(String, nullable=True)

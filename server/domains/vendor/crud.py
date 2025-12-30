@@ -8,6 +8,8 @@ def create_vendor(db: Session, vendor: VendorCreate) -> Vendor:
     db_vendor = Vendor(
         name=vendor.name,
         tel=vendor.tel,
+        fax=vendor.fax,
+        email=vendor.email,
         control_range=vendor.control_range,
         template_id=vendor.template
     )
