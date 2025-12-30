@@ -41,7 +41,7 @@ interface ComplexesState {
   fetchComplexes: (skip?: number, limit?: number) => Promise<void>
   fetchComplex: (id: number) => Promise<void>
   fetchAllComplexNames: () => Promise<void>
-  searchComplexes: (query: string) => Promise<void>
+  searchComplexes: (query: string, skip?: number, limit?: number) => Promise<void>
   createComplex: (complex: ComplexCreate) => Promise<void>
   updateComplex: (id: number, complex: Partial<ComplexCreate>) => Promise<void>
   deleteComplex: (id: number) => Promise<void>
@@ -91,10 +91,10 @@ export const useComplexes = create<ComplexesState>((set) => ({
     }
   },
 
-  searchComplexes: async (query: string) => {
+  searchComplexes: async (query: string, skip = 0, limit = 100) => {
     set({ loading: true, error: null })
     try {
-      const response = await apiGetWithAuth(`/api/v1/complexes/search/${query}`)
+      const response = await apiGetWithAuth(`/api/v1/complexes/search/${query}`, { skip, limit })
       if (response.success) {
         set({ complexes: response.data, loading: false })
       } else {

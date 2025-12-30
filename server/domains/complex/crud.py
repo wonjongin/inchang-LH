@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, load_only
 from typing import List, Optional
 from models.models import Complex
-from .schema import ComplexCreate, ComplexQuickSearchResponse
+from .schema import ComplexCreate, ComplexQuickSearchResponse, ComplexResponse
 
 
 def create_complex(db: Session, complex: ComplexCreate) -> Complex:
@@ -22,16 +22,17 @@ def get_complexes(db: Session, skip: int = 0, limit: int = 100) -> List[Complex]
 def get_complexes_count(db: Session) -> int:
     return db.query(Complex).count()
 
+def get_complexes_count_by_query(db: Session, query: str) -> int:
+    return db.query(Complex).filter(Complex.name.ilike(f"%{query}%")).count()
+
 def get_all_complex_names(db: Session) -> List[ComplexQuickSearchResponse]:
     return db.query(Complex).options(
         load_only(Complex.id, Complex.name)
     ).order_by(Complex.name.asc()).all()
 
 
-def search_complexes(db: Session, query: str) -> List[ComplexQuickSearchResponse]:
-    return db.query(Complex).options(
-        load_only(Complex.id, Complex.name)
-    ).filter(Complex.name.ilike(f"%{query}%")).order_by(Complex.name.asc()).all()
+def search_complexes(db: Session, query: str, skip: int = 0, limit: int = 100) -> List[ComplexResponse]:
+    return db.query(Complex).filter(Complex.name.ilike(f"%{query}%")).order_by(Complex.name.asc()).offset(skip).limit(limit).all()
 
 
 def update_complex(db: Session, complex_id: int, **kwargs) -> Optional[Complex]:

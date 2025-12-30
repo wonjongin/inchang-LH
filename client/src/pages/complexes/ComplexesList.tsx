@@ -44,7 +44,7 @@ export default function ComplexesList() {
 
     const handleSearch = () => {
         if (search.length > 0) {
-            searchComplexes(search)
+            searchComplexes(search, first, 100)
         } else {
             fetchComplexes()
         }
@@ -66,11 +66,10 @@ export default function ComplexesList() {
                 <Button icon="pi pi-plus" label="단지 등록" onClick={() => navigate('/complexes/new')} />
             </div>
             <br />
-            {loading ? <Loading /> : (
-            <>
             <Paginator first={first} rows={complexes.limit} totalRecords={complexes.total} onPageChange={(e) => {
                 setFirst(e.first)
             }} />
+            {loading ? <Loading /> : (
             <DataTable value={complexes.items.map((complex) => ({
                 ...complex,
                 edit: <a href={`/complexes/edit/${complex.id}`}>📝</a>,
@@ -97,8 +96,7 @@ export default function ComplexesList() {
                 {me?.permission === 1 && (
                     <Column field="delete" header="삭제" align="center" /> )}
             </DataTable> 
-            
-            </>)}
+            )}
             </div>
         </div>
     )

@@ -28,6 +28,18 @@ async def get_all_complex_names(db: Session = Depends(get_db)):
     complexes = crud.get_all_complex_names(db)
     return CommonResponse(data=[ComplexQuickSearchResponse.model_validate(c) for c in complexes])
 
+
+@router.get("/search/{query}", response_model=CommonResponse[ComplexPaginatedResponse])
+async def search_complexes(query: str, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    complexes = crud.search_complexes(db, query=query, skip=skip, limit=limit)
+    return CommonResponse(data=ComplexPaginatedResponse.model_validate(ComplexPaginatedResponse(
+        items=complexes,
+        total=crud.get_complexes_count_by_query(db, query),
+        page=skip + 1,
+        limit=limit,
+        pages=crud.get_complexes_count_by_query(db, query) // 100 + 1
+    )))
+
 @router.get("/{complex_id}", response_model=CommonResponse[ComplexResponse])
 async def get_complex(complex_id: int, db: Session = Depends(get_db)):
     complex = crud.get_complex(db, complex_id=complex_id)
@@ -35,11 +47,6 @@ async def get_complex(complex_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complex not found")
     return CommonResponse(data=ComplexResponse.model_validate(complex))
 
-
-@router.get("/search/{query}", response_model=CommonResponse[List[ComplexQuickSearchResponse]])
-async def search_complexes(query: str, db: Session = Depends(get_db)):
-    complexes = crud.search_complexes(db, query=query)
-    return CommonResponse(data=[ComplexQuickSearchResponse.model_validate(c) for c in complexes])
 
 
 @router.post("/", response_model=CommonResponse[ComplexResponse], status_code=status.HTTP_201_CREATED)
