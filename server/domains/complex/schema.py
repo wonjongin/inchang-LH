@@ -31,3 +31,11 @@ class ComplexPaginatedResponse(BaseModel):
     page: int
     limit: int
     pages: int
+
+
+class ComplexQuickSearchResponse(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True

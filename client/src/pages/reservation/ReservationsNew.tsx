@@ -14,10 +14,11 @@ import { useNavigate } from "react-router-dom";
 import { AutoComplete } from "primereact/autocomplete";
 import { disassemble } from "es-hangul";
 import { InputMask } from "primereact/inputmask";
+import { Dropdown } from "primereact/dropdown";
 
 export default function ReservationsNew() {
     const { createReservation } = useReservations()
-    const { complexes, fetchComplexes } = useComplexes()
+    const { all_complex_names, fetchAllComplexNames } = useComplexes()
     const { vendors, fetchVendors } = useVendors()
     const { templates, fetchTemplates } = useTemplates()
     const navigate = useNavigate()
@@ -35,10 +36,11 @@ export default function ReservationsNew() {
     })
 
     useEffect(() => {
-        fetchComplexes()
+        // fetchComplexes()
         fetchVendors()
         fetchTemplates()
-    }, [fetchComplexes, fetchVendors, fetchTemplates])
+        fetchAllComplexNames()
+    }, [fetchVendors, fetchTemplates, fetchAllComplexNames])
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -95,10 +97,10 @@ export default function ReservationsNew() {
                 <AutoComplete 
                     id="location"
                     value={formData.location_name} 
-                    onChange={(e) => setFormData({ ...formData, location_name: e.value, location: complexes.find(c => c.name === e.value)?.id || 0 })} 
-                    suggestions={complexes.map(c => c.name).filter(c => disassemble(c).includes(disassemble(formData.location_name)))}
+                    onChange={(e) => setFormData({ ...formData, location_name: e.value, location: all_complex_names.find(c => c.name === e.value)?.id || 0 })} 
+                    suggestions={all_complex_names.map(c => c.name).filter(c => disassemble(c).includes(disassemble(formData.location_name)))}
                     completeMethod={(e) => {
-                        return complexes.filter(c => disassemble(c.name).includes(disassemble(e.query))).map(c => c.name)
+                        return all_complex_names.filter(c => disassemble(c.name).includes(disassemble(e.query))).map(c => c.name)
                     }}
                     placeholder="단지를 선택하세요"
                     className="w-full" 
@@ -129,21 +131,18 @@ export default function ReservationsNew() {
             ),
         },
         {
-            label: '템플릿',
+            label: '양식',
             id: 'template',
             input: (
-                <AutoComplete 
+                <Dropdown 
                     id="template"
-                    value={formData.template_name} 
-                    onChange={(e) => setFormData({ ...formData, template_name: e.value, template: templates.find(t => t.name === e.value)?.id || 0 })} 
-                    suggestions={templates.map(t => t.name).filter(t => disassemble(t).includes(disassemble(formData.template_name)))}
-                    completeMethod={(e) => {
-                        return templates.filter(t => disassemble(t.name).includes(disassemble(e.query))).map(t => t.name)
-                    }}
-                    placeholder="템플릿을 선택하세요 (선택사항)"
+                    value={formData.template || null} 
+                    onChange={(e: any) => setFormData({ ...formData, template: e.value })} 
+                    options={templates.map(t => ({ label: t.name, value: t.id }))}
+                    placeholder="양식을 선택하세요 (선택사항)"
                     className="w-full" 
-                    inputStyle={{ width: '100%', maxWidth: 'none' }}
                     style={{ width: '100%', maxWidth: 'none' }}
+                    showClear
                 />
             ),
         },

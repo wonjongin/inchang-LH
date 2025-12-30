@@ -75,7 +75,7 @@ export default function VendorsEdit() {
             defaultValue: selectedVendor?.name || '',
         },
         {
-            label: '템플릿',
+            label: '양식',
             id: 'template',
             input: (
                 <Dropdown 
@@ -83,7 +83,7 @@ export default function VendorsEdit() {
                     value={formData.template || null} 
                     onChange={(e) => setFormData({ ...formData, template: e.value })} 
                     options={templates.map(t => ({ label: t.name, value: t.id }))}
-                    placeholder="템플릿을 선택하세요 (선택사항)"
+                    placeholder="양식을 선택하세요 (선택사항)"
                     className="w-full" 
                     style={{ width: '100%', maxWidth: 'none' }}
                     showClear

@@ -25,15 +25,22 @@ export interface ComplexPaginatedResponse {
   limit: number
 }
 
+export interface ComplexQuickSearchResponse {
+  id: number
+  name: string
+}
+
 interface ComplexesState {
   complexes: ComplexPaginatedResponse
   selectedComplex: Complex | null
+  all_complex_names: ComplexQuickSearchResponse[]
   loading: boolean
   error: string | null
   
   // Actions
   fetchComplexes: (skip?: number, limit?: number) => Promise<void>
   fetchComplex: (id: number) => Promise<void>
+  fetchAllComplexNames: () => Promise<void>
   searchComplexes: (query: string) => Promise<void>
   createComplex: (complex: ComplexCreate) => Promise<void>
   updateComplex: (id: number, complex: Partial<ComplexCreate>) => Promise<void>
@@ -45,6 +52,7 @@ interface ComplexesState {
 export const useComplexes = create<ComplexesState>((set) => ({
   complexes: { items: [], total: 0, page: 0, limit: 0 },
   selectedComplex: null,
+  all_complex_names: [],
   loading: false,
   error: null,
 
@@ -91,6 +99,23 @@ export const useComplexes = create<ComplexesState>((set) => ({
         set({ complexes: response.data, loading: false })
       } else {
         set({ error: response.message || '검색에 실패했습니다.', loading: false })
+      }
+    } catch (error: any) {
+      set({ 
+        error: error.response?.data?.detail || '서버에 연결할 수 없습니다.', 
+        loading: false 
+      })
+    }
+  },
+
+  fetchAllComplexNames: async () => {
+    set({ loading: true, error: null })
+    try {
+      const response = await apiGetWithAuth('/api/v1/complexes/all_names')
+      if (response.success) {
+        set({ all_complex_names: response.data, loading: false })
+      } else {
+        set({ error: response.message || '단지 이름 목록을 불러오는데 실패했습니다.', loading: false })
       }
     } catch (error: any) {
       set({ 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from db.database import get_db
 from schemas.common import CommonResponse
-from .schema import ComplexCreate, ComplexUpdate, ComplexResponse, ComplexPaginatedResponse
+from .schema import ComplexCreate, ComplexUpdate, ComplexResponse, ComplexPaginatedResponse, ComplexQuickSearchResponse
 from . import crud
 
 router = APIRouter()
@@ -23,6 +23,11 @@ async def get_complexes(skip: int = 0, limit: int = 100, db: Session = Depends(g
     )))
 
 
+@router.get("/all_names", response_model=CommonResponse[List[ComplexQuickSearchResponse]])
+async def get_all_complex_names(db: Session = Depends(get_db)):
+    complexes = crud.get_all_complex_names(db)
+    return CommonResponse(data=[ComplexQuickSearchResponse.model_validate(c) for c in complexes])
+
 @router.get("/{complex_id}", response_model=CommonResponse[ComplexResponse])
 async def get_complex(complex_id: int, db: Session = Depends(get_db)):
     complex = crud.get_complex(db, complex_id=complex_id)
@@ -31,10 +36,10 @@ async def get_complex(complex_id: int, db: Session = Depends(get_db)):
     return CommonResponse(data=ComplexResponse.model_validate(complex))
 
 
-@router.get("/search/{query}", response_model=CommonResponse[List[ComplexResponse]])
+@router.get("/search/{query}", response_model=CommonResponse[List[ComplexQuickSearchResponse]])
 async def search_complexes(query: str, db: Session = Depends(get_db)):
     complexes = crud.search_complexes(db, query=query)
-    return CommonResponse(data=[ComplexResponse.model_validate(c) for c in complexes])
+    return CommonResponse(data=[ComplexQuickSearchResponse.model_validate(c) for c in complexes])
 
 
 @router.post("/", response_model=CommonResponse[ComplexResponse], status_code=status.HTTP_201_CREATED)

@@ -36,7 +36,7 @@ export default function ComplexesList() {
     }, [])
 
     useEffect(() => {
-        fetchComplexes(first, complexes.limit)
+        fetchComplexes(first, 100)
     }, [first])
     if (error) {
         return <div>Error: {error}</div>
