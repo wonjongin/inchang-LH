@@ -18,8 +18,15 @@ export interface ComplexCreate {
   email?: string | null
 }
 
+export interface ComplexPaginatedResponse {
+  items: Complex[]
+  total: number
+  page: number
+  limit: number
+}
+
 interface ComplexesState {
-  complexes: Complex[]
+  complexes: ComplexPaginatedResponse
   selectedComplex: Complex | null
   loading: boolean
   error: string | null
@@ -36,7 +43,7 @@ interface ComplexesState {
 }
 
 export const useComplexes = create<ComplexesState>((set) => ({
-  complexes: [],
+  complexes: { items: [], total: 0, page: 0, limit: 0 },
   selectedComplex: null,
   loading: false,
   error: null,
@@ -100,7 +107,7 @@ export const useComplexes = create<ComplexesState>((set) => ({
       if (response.success) {
         const newComplex = response.data
         set((state) => ({ 
-          complexes: [...state.complexes, newComplex], 
+          complexes: { ...state.complexes, items: [...state.complexes.items, newComplex] }, 
           loading: false 
         }))
       } else {
@@ -121,7 +128,7 @@ export const useComplexes = create<ComplexesState>((set) => ({
       if (response.success) {
         const updatedComplex = response.data
         set((state) => ({
-          complexes: state.complexes.map((c) => (c.id === id ? updatedComplex : c)),
+          complexes: { ...state.complexes, items: state.complexes.items.map((c) => (c.id === id ? updatedComplex : c)) },
           selectedComplex: state.selectedComplex?.id === id ? updatedComplex : state.selectedComplex,
           loading: false,
         }))
@@ -142,7 +149,7 @@ export const useComplexes = create<ComplexesState>((set) => ({
       const response = await apiDeleteWithAuth(`/api/v1/complexes/${id}`)
       if (response.success) {
         set((state) => ({
-          complexes: state.complexes.filter((c) => c.id !== id),
+          complexes: { ...state.complexes, items: state.complexes.items.filter((c) => c.id !== id) },
           selectedComplex: state.selectedComplex?.id === id ? null : state.selectedComplex,
           loading: false,
         }))

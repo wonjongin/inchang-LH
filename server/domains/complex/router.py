@@ -5,16 +5,22 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from db.database import get_db
 from schemas.common import CommonResponse
-from .schema import ComplexCreate, ComplexUpdate, ComplexResponse
+from .schema import ComplexCreate, ComplexUpdate, ComplexResponse, ComplexPaginatedResponse
 from . import crud
 
 router = APIRouter()
 
 
-@router.get("/", response_model=CommonResponse[List[ComplexResponse]])
+@router.get("/", response_model=CommonResponse[ComplexPaginatedResponse])
 async def get_complexes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     complexes = crud.get_complexes(db, skip=skip, limit=limit)
-    return CommonResponse(data=[ComplexResponse.model_validate(c) for c in complexes])
+    return CommonResponse(data=ComplexPaginatedResponse.model_validate(ComplexPaginatedResponse(
+        items=complexes,
+        total=crud.get_complexes_count(db),
+        page=skip + 1,
+        limit=limit,
+        pages=crud.get_complexes_count(db) // limit + 1
+    )))
 
 
 @router.get("/{complex_id}", response_model=CommonResponse[ComplexResponse])

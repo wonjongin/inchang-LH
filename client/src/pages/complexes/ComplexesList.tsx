@@ -9,6 +9,7 @@ import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import { useUsers } from "../../stores/useUsers";
+import { Paginator } from "primereact/paginator";
 
 const styles = stylex.create({
     page: {
@@ -26,11 +27,17 @@ export default function ComplexesList() {
     const { complexes, loading, error, fetchComplexes, searchComplexes, deleteComplex } = useComplexes()
     const { me, fetchMe } = useUsers()
     const [search, setSearch] = useState('')
+    const [first, setFirst] = useState(0)
+
     const navigate = useNavigate()
     useEffect(() => {
         fetchComplexes();
         fetchMe()
     }, [])
+
+    useEffect(() => {
+        fetchComplexes(first, complexes.limit)
+    }, [first])
     if (error) {
         return <div>Error: {error}</div>
     }
@@ -60,7 +67,11 @@ export default function ComplexesList() {
             </div>
             <br />
             {loading ? <Loading /> : (
-            <DataTable value={complexes.map((complex) => ({
+            <>
+            <Paginator first={first} rows={complexes.limit} totalRecords={complexes.total} onPageChange={(e) => {
+                setFirst(e.first)
+            }} />
+            <DataTable value={complexes.items.map((complex) => ({
                 ...complex,
                 edit: <a href={`/complexes/edit/${complex.id}`}>📝</a>,
                 delete:<a href={`/complexes/delete/${complex.id}`} onClick={(e) => {
@@ -85,7 +96,9 @@ export default function ComplexesList() {
                 <Column field="edit" header="수정" align="center" />
                 {me?.permission === 1 && (
                     <Column field="delete" header="삭제" align="center" /> )}
-            </DataTable> )}
+            </DataTable> 
+            
+            </>)}
             </div>
         </div>
     )

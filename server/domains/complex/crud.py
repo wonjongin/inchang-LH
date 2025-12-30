@@ -17,7 +17,10 @@ def get_complex(db: Session, complex_id: int) -> Optional[Complex]:
 
 
 def get_complexes(db: Session, skip: int = 0, limit: int = 100) -> List[Complex]:
-    return db.query(Complex).offset(skip).limit(limit).all()
+    return db.query(Complex).order_by(Complex.name.asc()).offset(skip).limit(limit).all()
+
+def get_complexes_count(db: Session) -> int:
+    return db.query(Complex).count()
 
 
 def search_complexes(db: Session, query: str) -> List[Complex]:

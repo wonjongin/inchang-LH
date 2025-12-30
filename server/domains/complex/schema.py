@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 
 
 class ComplexBase(BaseModel):
@@ -25,3 +25,9 @@ class ComplexResponse(ComplexBase):
     class Config:
         from_attributes = True
 
+class ComplexPaginatedResponse(BaseModel):
+    items: List[ComplexResponse]
+    total: int
+    page: int
+    limit: int
+    pages: int
