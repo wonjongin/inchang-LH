@@ -193,7 +193,7 @@ export default function ReservationsNew() {
             ),
         },
         {
-            label: '접수 사진',
+            label: '접수 문서',
             id: 'reservation_photo',
             input: (
                 <FileUpload
@@ -205,7 +205,7 @@ export default function ReservationsNew() {
                         const file = e.files[0]
                         setReservationPhoto(file)
                     }}
-                    chooseLabel={reservationPhoto ? reservationPhoto.name : "접수 사진 선택"}
+                    chooseLabel={reservationPhoto ? reservationPhoto.name : "접수 문서 선택"}
                     className="w-full"
                 />
             ),
