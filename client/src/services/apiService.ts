@@ -85,6 +85,35 @@ async function apiPostWithAuth(path: string, data: any = {}): Promise<any> {
   }
 }
 
+async function apiPostWithAuthFormData(path: string, formData: FormData): Promise<any> {
+  try {
+    const accessToken = localStorage.getItem('accessToken')?.trim()
+    if (!accessToken) {
+      throw new Error('인증 토큰이 없습니다. 다시 로그인해주세요.')
+    }
+    const response = await apiService.post(path, formData, { headers: { Authorization: `Bearer ${accessToken}` } })
+    return response.data
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      const refreshToken = localStorage.getItem('refreshToken')
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('accessTokenExpiredAt')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('refreshTokenExpiredAt')
+      const refreshResponse = await apiPost('/api/v1/auth/refresh', { refreshToken })
+      if (refreshResponse.success) {
+        localStorage.setItem('accessToken', refreshResponse.data.accessToken)
+        localStorage.setItem('accessTokenExpiredAt', refreshResponse.data.accessTokenExpiredAt)
+        localStorage.setItem('refreshToken', refreshResponse.data.refreshToken)
+        localStorage.setItem('refreshTokenExpiredAt', refreshResponse.data.refreshTokenExpiredAt)
+        return await apiPostWithAuthFormData(path, formData)
+      }
+      throw new Error('인증 정보를 확인할 수 없습니다.')
+    }
+    throw error
+  }
+  }
+
 async function apiPutWithAuth(path: string, data: any = {}): Promise<any> {
   try {
     const accessToken = localStorage.getItem('accessToken')?.trim()
@@ -143,4 +172,4 @@ async function apiDeleteWithAuth(path: string): Promise<any> {
   }
 }
 
-export { apiGet, apiPost, apiPut, apiDelete, apiGetWithAuth, apiPostWithAuth, apiPutWithAuth, apiDeleteWithAuth }
+export { apiGet, apiPost, apiPut, apiDelete, apiGetWithAuth, apiPostWithAuth, apiPutWithAuth, apiDeleteWithAuth, apiPostWithAuthFormData }

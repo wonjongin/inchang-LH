@@ -15,6 +15,7 @@ import { AutoComplete } from "primereact/autocomplete";
 import { disassemble } from "es-hangul";
 import { InputMask } from "primereact/inputmask";
 import { Dropdown } from "primereact/dropdown";
+import { FileUpload } from "primereact/fileupload";
 
 export default function ReservationsNew() {
     const { createReservation } = useReservations()
@@ -22,6 +23,7 @@ export default function ReservationsNew() {
     const { vendors, fetchVendors } = useVendors()
     const { templates, fetchTemplates } = useTemplates()
     const navigate = useNavigate()
+    const [reservationPhoto, setReservationPhoto] = useState<File | null>(null)
     const [formData, setFormData] = useState<ReservationCreate & { location_name: string, vendor_name: string, template_name: string }>({
         cotis: '',
         reserved_at: '',
@@ -61,7 +63,7 @@ export default function ReservationsNew() {
             template: formData.template && formData.template > 0 ? formData.template : null,
         }
         
-        createReservation(reservationData)  
+        createReservation(reservationData, reservationPhoto)  
         .then(() => {
             alert('접수 등록이 완료되었습니다.')
             navigate('/reservations/list')
@@ -187,6 +189,24 @@ export default function ReservationsNew() {
                     className="w-full" 
                     style={{ width: '100%', maxWidth: 'none' }}
                     rows={3}
+                />
+            ),
+        },
+        {
+            label: '접수 사진',
+            id: 'reservation_photo',
+            input: (
+                <FileUpload
+                    mode="basic"
+                    accept=".pdf"
+                    maxFileSize={20000000}
+                    auto
+                    onSelect={(e) => {
+                        const file = e.files[0]
+                        setReservationPhoto(file)
+                    }}
+                    chooseLabel={reservationPhoto ? reservationPhoto.name : "접수 사진 선택"}
+                    className="w-full"
                 />
             ),
         },

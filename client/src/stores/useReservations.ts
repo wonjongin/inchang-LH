@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { apiGetWithAuth, apiPostWithAuth, apiPutWithAuth, apiDeleteWithAuth } from '../services/apiService'
+import { apiGetWithAuth, apiPutWithAuth, apiDeleteWithAuth, apiPostWithAuthFormData   } from '../services/apiService'
 
 export interface Reservation {
   id: number
@@ -47,7 +47,7 @@ interface ReservationsState {
   fetchReservationsByMonth: (year: number, month: number, filter?: string) => Promise<void>
   fetchReservation: (id: number) => Promise<void>
   searchReservations: (query: string) => Promise<void>
-  createReservation: (reservation: ReservationCreate) => Promise<void>
+  createReservation: (reservation: ReservationCreate, reservation_photo: File | null) => Promise<void>
   updateReservation: (id: number, reservation: Partial<ReservationCreate>) => Promise<void>
   deleteReservation: (id: number) => Promise<void>
   setSelectedReservation: (reservation: Reservation | null) => void
@@ -135,10 +135,19 @@ export const useReservations = create<ReservationsState>((set) => ({
     }
   },
 
-  createReservation: async (reservation: ReservationCreate) => {
+  createReservation: async (reservation: ReservationCreate, reservation_photo: File | null) => {
     set({ loading: true, error: null })
     try {
-      const response = await apiPostWithAuth('/api/v1/reservations', reservation)
+      const formData = new FormData()
+      formData.append('cotis', reservation.cotis)
+      formData.append('reserved_at', reservation.reserved_at)
+      formData.append('is_transfered', reservation.is_transfered?.toString() || 'false')
+      formData.append('description', reservation.description || '')
+      formData.append('location', reservation.location.toString())
+      formData.append('vendor', reservation.vendor.toString())
+      formData.append('template', reservation.template?.toString() || '')
+      if (reservation_photo) formData.append('reservation_photo', reservation_photo)
+      const response = await apiPostWithAuthFormData('/api/v1/reservations', formData)
       if (response.success) {
         const newReservation = response.data
         set((state) => ({ 

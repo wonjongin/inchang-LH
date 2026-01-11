@@ -105,8 +105,8 @@ export default function ReservationsList() {
                         }
                     }}>🗑️</a>,
                     complete: reservation.completed_at ? 
-                        <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${reservation.id}/generate-certificate`}>✅</a> : 
-                        <a href={`/reservations/complete/${reservation.id}`}>☑️</a>,
+                        <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${reservation.id}/generate-certificate`}>🟩</a> : 
+                        <a href={`/reservations/complete/${reservation.id}`}>🟥</a>,
                 }))} size="small" stripedRows showGridlines>
                     <Column field="cotis" header="COTIS" />
                     <Column field="locationName" header="단지" />
@@ -115,6 +115,7 @@ export default function ReservationsList() {
                     <Column field="reserved_at" header="접수일" />
                     <Column field="completed_at" header="완료일" />
                     <Column field="is_transfered" header="이관" body={(rowData) => rowData.is_transfered ? 'Y' : 'N'} />
+                    <Column field="reservation_photo" header="접사" align="center" body={(rowData) => <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${rowData.id}/reservation-photo`} download={true}>📷</a>} />
                     <Column field="generate_certificate_template" header="양식" align="center" body={(rowData) => <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${rowData.id}/generate-certificate-template`} download={true}>🖨️</a>} />
                     <Column field="complete" header="완료" align="center" />
                     <Column field="edit" header="수정" align="center" />
