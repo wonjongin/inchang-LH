@@ -105,8 +105,8 @@ export default function ReservationsList() {
                         }
                     }}>🗑️</a>,
                     complete: reservation.completed_at ? 
-                        <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${reservation.id}/generate-certificate`}>🟩</a> : 
-                        <a href={`/reservations/complete/${reservation.id}`}>🟥</a>,
+                        <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${reservation.id}/generate-certificate`}>🟧</a> : 
+                        <a href={`/reservations/complete/${reservation.id}`}>🟦</a>,
                 }))} size="small" stripedRows showGridlines>
                     <Column field="cotis" header="COTIS" />
                     <Column field="locationName" header="단지" />
