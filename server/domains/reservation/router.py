@@ -68,33 +68,55 @@ async def search_reservations(query: str, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=CommonResponse[ReservationResponse], status_code=status.HTTP_201_CREATED)
-async def create_reservation(reservation: ReservationCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def create_reservation(
+    cotis: str = Form(...),
+    reserved_at: date = Form(...),
+    is_transfered: bool = Form(...),
+    description: Optional[str] = Form(None),
+    location: int = Form(...),
+    vendor: int = Form(...),
+    template: Optional[int] = Form(None),
+    reservation_photo: Optional[UploadFile] = File(None), 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user)):
     # COTIS 중복 체크
-    existing = crud.get_reservation_by_cotis(db, cotis=reservation.cotis)
+    existing = crud.get_reservation_by_cotis(db, cotis=cotis)
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="COTIS 번호가 이미 존재합니다.")
     
     # 관련 엔티티 존재 확인
     from domains.complex import crud as complex_crud
-    complex = complex_crud.get_complex(db, complex_id=reservation.location)
+    complex = complex_crud.get_complex(db, complex_id=location)
     if not complex:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complex not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="단지를 찾을 수 없습니다.")
     
     from domains.vendor import crud as vendor_crud
-    vendor = vendor_crud.get_vendor(db, vendor_id=reservation.vendor)
-    if not vendor:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vendor not found")
+    vendor_obj = vendor_crud.get_vendor(db, vendor_id=vendor)
+    if not vendor_obj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="업체를 찾을 수 없습니다.")
     
     from domains.user import crud as user_crud
     user = user_crud.get_user(db, user_id=current_user.id)
     
-    if reservation.template:
+    template_id = template
+    if template:
         from domains.template import crud as template_crud
-        template = template_crud.get_template(db, template_id=reservation.template)
-        if not template:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
-    
-    db_reservation = crud.create_reservation(db=db, reservation=reservation, user_id=current_user.id)
+        template_obj = template_crud.get_template(db, template_id=template)
+        if not template_obj:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="양식을 찾을 수 없습니다.")
+
+    db_reservation = crud.create_reservation(db=db, reservation=ReservationCreate(cotis=cotis, reserved_at=reserved_at, is_transfered=is_transfered, description=description, location=location, vendor=vendor, template=template_id), user_id=current_user.id)
+
+    # PDF 파일 저장
+    if reservation_photo and reservation_photo.filename:
+        # 업로드 디렉토리 생성
+        upload_dir = Path("data/reservation_photos")
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        
+        # 파일 저장
+        file_path = upload_dir / f"rp_{db_reservation.id}.pdf"
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(reservation_photo.file, buffer)
     return CommonResponse(data=ReservationResponse.model_validate(db_reservation))
 
 
@@ -156,6 +178,17 @@ async def delete_reservation(reservation_id: int, current_user: User = Depends(g
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
     return CommonResponse(data={"deleted": True})
 
+
+@router.get("/{reservation_id}/reservation-photo")
+async def get_reservation_photo(reservation_id: int, db: Session = Depends(get_db)):
+    reservation = crud.get_reservation(db, reservation_id=reservation_id)
+    if not reservation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
+    file_path = Path(f"data/reservation_photos/rp_{reservation_id}.pdf")
+    if not file_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation photo not found")
+    description = reservation.description[:50] if reservation.description else ""
+    return FileResponse(path=str(file_path), filename=f"{year_to_yearcode(reservation.reserved_at.year)}{reservation.reserved_at.strftime('%m%d')}-접사 -{reservation.vendor.name}-{reservation.location.name}-{description}.pdf", media_type="application/pdf")
 
 @router.get("/{reservation_id}/generate-certificate-template")
 async def generate_certificate_template(reservation_id: int, db: Session = Depends(get_db)):
@@ -234,7 +267,8 @@ async def generate_certificate(reservation_id: int, db: Session = Depends(get_db
     file_path = Path(f"data/certificates/{reservation_id}.pdf")
     if not file_path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Certificate not found")
-    return FileResponse(path=str(file_path), filename=f"{year_to_yearcode(reservation.reserved_at.year)}{reservation.reserved_at.strftime('%m%d')}-완료확인-{reservation.vendor.name}-{reservation.location.name}-{reservation.description[:50]}.pdf", media_type="application/pdf")
+    description = reservation.description[:50] if reservation.description else ""
+    return FileResponse(path=str(file_path), filename=f"{year_to_yearcode(reservation.reserved_at.year)}{reservation.reserved_at.strftime('%m%d')}-완료확인-{reservation.vendor.name}-{reservation.location.name}-{description}.pdf", media_type="application/pdf")
 
 @router.get("/get-reservations/{year}")
 async def get_reservations_by_year(year: int, db: Session = Depends(get_db)) -> FileResponse:

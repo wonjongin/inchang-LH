@@ -75,7 +75,7 @@ def get_reservations_by_month(db: Session, year: int, month: int, filter: Option
         extract('year', Reservation.reserved_at) == year,
         extract('month', Reservation.reserved_at) == month
     )
-    return query.order_by(Reservation.reserved_at.asc()).all()
+    return query.order_by(Reservation.reserved_at.desc()).all()
 
 def get_reservations_by_year(db: Session, year: int) -> List[Reservation]:
     return db.query(Reservation).options(
