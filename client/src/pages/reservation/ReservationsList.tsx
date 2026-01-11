@@ -85,7 +85,10 @@ export default function ReservationsList() {
                 </div>
                 <br />
                 {loading ? <Loading /> : (
-                <DataTable value={reservations.map((reservation) => ({
+                <DataTable 
+                  resizableColumns
+                  selectionMode="single"
+                  value={reservations.map((reservation) => ({
                     ...reservation,
                     locationName: reservation.location.name,
                     vendorName: reservation.vendor.name,
@@ -110,10 +113,10 @@ export default function ReservationsList() {
                 }))} size="small" stripedRows showGridlines>
                     <Column field="reserved_at" header="접수일" />
                     <Column field="completed_at" header="완료일" />
+                    <Column field="vendorName" header="업체" />
                     <Column field="cotis" header="COTIS" />
                     <Column field="locationName" header="단지" />
                     <Column field="description" header="접수 내용" />
-                    <Column field="vendorName" header="업체" />
                     {/* <Column field="authorName" header="작성자" /> */}
                     <Column field="is_transfered" header="이관" body={(rowData) => rowData.is_transfered ? 'Y' : 'N'} />
                     <Column field="reservation_photo" header="접문" align="center" body={(rowData) => <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${rowData.id}/reservation-photo`} download={true}>📷</a>} />
