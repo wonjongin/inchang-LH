@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { apiGetWithAuth, apiPutWithAuth, apiDeleteWithAuth, apiPostWithAuthFormData   } from '../services/apiService'
+import { apiGetWithAuth, apiPutWithAuth, apiDeleteWithAuth, apiPostWithAuthFormData, apiPutWithAuthFormData   } from '../services/apiService'
 
 export interface Reservation {
   id: number
@@ -48,7 +48,7 @@ interface ReservationsState {
   fetchReservation: (id: number) => Promise<void>
   searchReservations: (query: string) => Promise<void>
   createReservation: (reservation: ReservationCreate, reservation_photo: File | null) => Promise<void>
-  updateReservation: (id: number, reservation: Partial<ReservationCreate>) => Promise<void>
+  updateReservation: (id: number, reservation: Partial<ReservationCreate>, reservation_photo: File | null) => Promise<void>
   deleteReservation: (id: number) => Promise<void>
   setSelectedReservation: (reservation: Reservation | null) => void
   clearError: () => void
@@ -165,10 +165,19 @@ export const useReservations = create<ReservationsState>((set) => ({
     }
   },
 
-  updateReservation: async (id: number, reservation: Partial<ReservationCreate>) => {
+  updateReservation: async (id: number, reservation: Partial<ReservationCreate>, reservation_photo: File | null) => {
     set({ loading: true, error: null })
     try {
-      const response = await apiPutWithAuth(`/api/v1/reservations/${id}`, reservation)
+      const formData = new FormData()
+      if (reservation.cotis) formData.append('cotis', reservation.cotis)
+      if (reservation.reserved_at) formData.append('reserved_at', reservation.reserved_at)
+      if (reservation.is_transfered) formData.append('is_transfered', reservation.is_transfered.toString())
+      if (reservation.description) formData.append('description', reservation.description)
+      if (reservation.location) formData.append('location', reservation.location.toString())
+      if (reservation.vendor) formData.append('vendor', reservation.vendor.toString())
+      if (reservation.template) formData.append('template', reservation.template.toString())
+      if (reservation_photo) formData.append('reservation_photo', reservation_photo)
+      const response = await apiPutWithAuthFormData(`/api/v1/reservations/${id}`, formData)
       if (response.success) {
         const updatedReservation = response.data
         set((state) => ({

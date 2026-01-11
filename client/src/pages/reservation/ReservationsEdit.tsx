@@ -15,6 +15,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AutoComplete } from "primereact/autocomplete";
 import { disassemble } from "es-hangul";
 import { Dropdown } from "primereact/dropdown";
+import { FileUpload } from "primereact/fileupload";
 
 export default function ReservationsEdit() {
     const { reservationId } = useParams()
@@ -36,7 +37,7 @@ export default function ReservationsEdit() {
         template_name: '',
         completed_at: null,
     })
-
+    const [reservationPhoto, setReservationPhoto] = useState<File | null>(null)
     useEffect(() => {
         if (reservationId) {
             fetchReservation(Number(reservationId))
@@ -84,7 +85,7 @@ export default function ReservationsEdit() {
             completed_at: formData.completed_at || null,
         }
         
-        updateReservation(Number(reservationId), reservationData)  
+        updateReservation(Number(reservationId), reservationData, reservationPhoto)  
         .then(() => {
             alert('접수 수정이 완료되었습니다.')
             navigate('/reservations/list')
@@ -224,6 +225,24 @@ export default function ReservationsEdit() {
                     className="w-full" 
                     style={{ width: '100%', maxWidth: 'none' }}
                     rows={3}
+                />
+            ),
+        },
+        {
+            label: '접수 문서',
+            id: 'reservation_photo',
+            input: (
+                <FileUpload
+                    mode="basic"
+                    accept=".pdf"
+                    maxFileSize={20000000}
+                    auto
+                    onSelect={(e) => {
+                        const file = e.files[0]
+                        setReservationPhoto(file)
+                    }}
+                    chooseLabel={reservationPhoto ? reservationPhoto.name : "접수 문서 선택"}
+                    className="w-full"
                 />
             ),
         },

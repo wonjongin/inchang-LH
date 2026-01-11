@@ -123,10 +123,25 @@ async def create_reservation(
 @router.put("/{reservation_id}", response_model=CommonResponse[ReservationResponse])
 async def update_reservation(
     reservation_id: int,
-    reservation: ReservationUpdate,
+    cotis: Optional[str] = Form(None),
+    reserved_at: Optional[date] = Form(None),
+    is_transfered: Optional[bool] = Form(None),
+    description: Optional[str] = Form(None),
+    location: Optional[int] = Form(None),
+    vendor: Optional[int] = Form(None),
+    template: Optional[int] = Form(None),
+    reservation_photo: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
-    update_data = reservation.model_dump(exclude_unset=True)
+    update_data = {
+        'cotis': cotis,
+        'reserved_at': reserved_at,
+        'is_transfered': is_transfered,
+        'description': description,
+        'location': location,
+        'vendor': vendor,
+        'template': template,
+    }
     
     # COTIS 중복 체크 (다른 예약과 중복되지 않는지)
     if 'cotis' in update_data:
@@ -159,6 +174,18 @@ async def update_reservation(
         if not template_obj:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
     
+
+    if reservation_photo and reservation_photo.filename:
+        # 업로드 디렉토리 생성
+        upload_dir = Path("data/reservation_photos")
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        
+        # 파일 저장
+        file_path = upload_dir / f"rp_{reservation_id}.pdf"
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(reservation_photo.file, buffer)
+
+
     db_reservation = crud.update_reservation(
         db=db,
         reservation_id=reservation_id,
@@ -188,7 +215,7 @@ async def get_reservation_photo(reservation_id: int, db: Session = Depends(get_d
     if not file_path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation photo not found")
     description = reservation.description[:50] if reservation.description else ""
-    return FileResponse(path=str(file_path), filename=f"{year_to_yearcode(reservation.reserved_at.year)}{reservation.reserved_at.strftime('%m%d')}-접사 -{reservation.vendor.name}-{reservation.location.name}-{description}.pdf", media_type="application/pdf")
+    return FileResponse(path=str(file_path), filename=f"{year_to_yearcode(reservation.reserved_at.year)}{reservation.reserved_at.strftime('%m%d')}-접문-{reservation.vendor.name}-{reservation.location.name}-{description}.pdf", media_type="application/pdf")
 
 @router.get("/{reservation_id}/generate-certificate-template")
 async def generate_certificate_template(reservation_id: int, db: Session = Depends(get_db)):
