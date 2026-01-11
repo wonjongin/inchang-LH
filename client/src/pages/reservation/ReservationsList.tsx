@@ -112,6 +112,7 @@ export default function ReservationsList() {
                     <Column field="completed_at" header="완료일" />
                     <Column field="cotis" header="COTIS" />
                     <Column field="locationName" header="단지" />
+                    <Column field="description" header="접수 내용" />
                     <Column field="vendorName" header="업체" />
                     {/* <Column field="authorName" header="작성자" /> */}
                     <Column field="is_transfered" header="이관" body={(rowData) => rowData.is_transfered ? 'Y' : 'N'} />
