@@ -1,5 +1,5 @@
 import colorsys
-
+import os
 
 def year_to_yearcode(year: int) -> str:
     # 2025 -> L
@@ -47,3 +47,6 @@ def get_color_by_int(index: int) -> str:
     b = int(rgb[2] * 255)
     
     return f"{r:02X}{g:02X}{b:02X}"
+
+def exists_reservation_photo(reservation_id: int) -> bool:
+    return os.path.exists(f"data/reservation_photos/rp_{reservation_id}.pdf")

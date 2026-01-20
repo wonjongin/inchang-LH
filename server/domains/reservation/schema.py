@@ -36,6 +36,7 @@ class ReservationResponse(ReservationBase):
     vendor: VendorResponse
     template: Optional[TemplateResponse] = None
     author: UserResponse
+    exists_reservation_photo: Optional[bool] = None
 
     class Config:
         from_attributes = True

@@ -14,7 +14,7 @@ from models.models import Permission, User
 from core.security import get_current_user
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
-from .util import get_color_by_int, year_to_yearcode
+from .util import get_color_by_int, year_to_yearcode, exists_reservation_photo
 router = APIRouter()
 
 
@@ -43,6 +43,8 @@ async def get_reservations(
 @router.get("/by-month/{year}/{month}", response_model=CommonResponse[List[ReservationResponse]])
 async def get_reservations_by_month(year: int, month: int, filter: Optional[str] = None, db: Session = Depends(get_db)):
     reservations = crud.get_reservations_by_month(db, year=year, month=month, filter=filter)
+    for reservation in reservations:
+        reservation.exists_reservation_photo = exists_reservation_photo(reservation.id)
     return CommonResponse(data=[ReservationResponse.model_validate(r) for r in reservations])
 
 @router.get("/{reservation_id}", response_model=CommonResponse[ReservationResponse])
@@ -50,6 +52,7 @@ async def get_reservation(reservation_id: int, db: Session = Depends(get_db)):
     reservation = crud.get_reservation(db, reservation_id=reservation_id)
     if not reservation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservation not found")
+    reservation.exists_reservation_photo = exists_reservation_photo(reservation.id)
     return CommonResponse(data=ReservationResponse.model_validate(reservation))
 
 
