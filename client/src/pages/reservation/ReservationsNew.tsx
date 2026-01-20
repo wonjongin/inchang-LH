@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { useReservations, type ReservationCreate } from '../../stores/useReservations';
 import { useComplexes } from '../../stores/useComplexes';
 import { useVendors } from '../../stores/useVendors';
-import { useTemplates } from '../../stores/useTemplates';   
+import { useTemplates } from '../../stores/useTemplates';
 import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -51,7 +51,7 @@ export default function ReservationsNew() {
             alert('필수 항목을 모두 입력해주세요.')
             return
         }
-        
+
         // 서버로 보낼 데이터 정제 (불필요한 필드 제거)
         const reservationData: ReservationCreate = {
             cotis: formData.cotis,
@@ -62,16 +62,16 @@ export default function ReservationsNew() {
             vendor: formData.vendor,
             template: formData.template && formData.template > 0 ? formData.template : null,
         }
-        
-        createReservation(reservationData, reservationPhoto)  
-        .then(() => {
-            alert('접수 등록이 완료되었습니다.')
-            navigate('/reservations/list')
-        })
-        .catch((error) => {
-            console.log(error)
-            alert(error.response.data.detail)
-        })
+
+        createReservation(reservationData, reservationPhoto)
+            .then(() => {
+                alert('접수 등록이 완료되었습니다.')
+                navigate('/reservations/list')
+            })
+            .catch((error) => {
+                console.log(error)
+                alert(error.response.data.detail)
+            })
     }
 
     const fields: FormField[] = [
@@ -80,15 +80,15 @@ export default function ReservationsNew() {
             id: 'cotis',
             input: (
                 <InputMask
-                    id="cotis" 
-                    value={formData.cotis} 
-                    onChange={(e) => setFormData({ ...formData, cotis: e.target.value || '' })} 
-                    placeholder="COTIS를 입력하세요 (예: 000000-00-00000)" 
-                    className="w-full" 
+                    id="cotis"
+                    value={formData.cotis}
+                    onChange={(e) => setFormData({ ...formData, cotis: e.target.value || '' })}
+                    placeholder="COTIS를 입력하세요 (예: 000000-00-00000)"
+                    className="w-full"
                     mask="999999-99-99999"
-                    style={{ width: '100%', maxWidth: 'none' }} 
+                    style={{ width: '100%', maxWidth: 'none' }}
                     invalid={!!validateCotisWithMessage(formData.cotis || '')}
-                    required 
+                    required
                 />
             ),
         },
@@ -96,16 +96,16 @@ export default function ReservationsNew() {
             label: '단지',
             id: 'location',
             input: (
-                <AutoComplete 
+                <AutoComplete
                     id="location"
-                    value={formData.location_name} 
-                    onChange={(e) => setFormData({ ...formData, location_name: e.value, location: all_complex_names.find(c => c.name === e.value)?.id || 0 })} 
+                    value={formData.location_name}
+                    onChange={(e) => setFormData({ ...formData, location_name: e.value, location: all_complex_names.find(c => c.name === e.value)?.id || 0 })}
                     suggestions={all_complex_names.map(c => c.name).filter(c => disassemble(c).includes(disassemble(formData.location_name)))}
                     completeMethod={(e) => {
                         return all_complex_names.filter(c => disassemble(c.name).includes(disassemble(e.query))).map(c => c.name)
                     }}
                     placeholder="단지를 선택하세요"
-                    className="w-full" 
+                    className="w-full"
                     inputStyle={{ width: '100%', maxWidth: 'none' }}
                     style={{ width: '100%', maxWidth: 'none' }}
                     required
@@ -116,16 +116,16 @@ export default function ReservationsNew() {
             label: '업체',
             id: 'vendor',
             input: (
-                <AutoComplete 
+                <AutoComplete
                     id="vendor"
-                    value={formData.vendor_name} 
-                    onChange={(e) => setFormData({ ...formData, vendor_name: e.value, vendor: vendors.find(v => v.name === e.value)?.id || 0 })} 
+                    value={formData.vendor_name}
+                    onChange={(e) => setFormData({ ...formData, vendor_name: e.value, vendor: vendors.find(v => v.name === e.value)?.id || 0 })}
                     suggestions={vendors.map(v => v.name).filter(v => disassemble(v).includes(disassemble(formData.vendor_name)))}
                     completeMethod={(e) => {
                         return vendors.filter(v => disassemble(v.name).includes(disassemble(e.query))).map(v => v.name)
                     }}
                     placeholder="업체를 선택하세요"
-                    className="w-full" 
+                    className="w-full"
                     style={{ width: '100%', maxWidth: 'none' }}
                     inputStyle={{ width: '100%', maxWidth: 'none' }}
                     required
@@ -136,13 +136,13 @@ export default function ReservationsNew() {
             label: '양식',
             id: 'template',
             input: (
-                <Dropdown 
+                <Dropdown
                     id="template"
-                    value={formData.template || null} 
-                    onChange={(e: any) => setFormData({ ...formData, template: e.value })} 
+                    value={formData.template || null}
+                    onChange={(e: any) => setFormData({ ...formData, template: e.value })}
                     options={templates.map(t => ({ label: t.name, value: t.id }))}
                     placeholder="양식을 선택하세요 (선택사항)"
-                    className="w-full" 
+                    className="w-full"
                     style={{ width: '100%', maxWidth: 'none' }}
                     showClear
                 />
@@ -152,14 +152,14 @@ export default function ReservationsNew() {
             label: '접수일',
             id: 'reserved_at',
             input: (
-                <Calendar 
+                <Calendar
                     id="reserved_at"
                     value={formData.reserved_at ? new Date(formData.reserved_at) : null}
-                    onChange={(e) => setFormData({ ...formData, reserved_at: e.value ? e.value.toISOString().split('T')[0] : '' })} 
+                    onChange={(e) => setFormData({ ...formData, reserved_at: e.value ? e.value.toISOString().split('T')[0] : '' })}
                     dateFormat="yy-mm-dd"
                     placeholder="접수일을 선택하세요"
                     locale="ko"
-                    className="w-full" 
+                    className="w-full"
                     style={{ width: '100%', maxWidth: 'none' }}
                     required
                     showIcon
@@ -170,10 +170,10 @@ export default function ReservationsNew() {
             label: '이관여부',
             id: 'is_transfered',
             input: (
-                <Checkbox 
+                <Checkbox
                     id="is_transfered"
                     checked={formData.is_transfered || false}
-                    onChange={(e) => setFormData({ ...formData, is_transfered: e.checked || false })} 
+                    onChange={(e) => setFormData({ ...formData, is_transfered: e.checked || false })}
                 />
             ),
         },
@@ -181,12 +181,12 @@ export default function ReservationsNew() {
             label: '설명',
             id: 'description',
             input: (
-                <InputTextarea 
-                    id="description" 
-                    value={formData.description || ''} 
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value || null })} 
-                    placeholder="설명을 입력하세요" 
-                    className="w-full" 
+                <InputTextarea
+                    id="description"
+                    value={formData.description || ''}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value || null })}
+                    placeholder="설명을 입력하세요"
+                    className="w-full"
                     style={{ width: '100%', maxWidth: 'none' }}
                     rows={3}
                 />
@@ -218,7 +218,7 @@ export default function ReservationsNew() {
             <div {...stylex.props(styles.content)}>
                 <h1>접수 등록</h1>
                 <p>접수 등록 페이지입니다.</p>
-                <FormBasic 
+                <FormBasic
                     fields={fields}
                     onSubmit={handleSubmit}
                     submitButton={{

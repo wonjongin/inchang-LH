@@ -99,8 +99,9 @@ export default function ReservationsList() {
                     <DataTable
                         resizableColumns
                         selectionMode="single"
-                        value={reservations.map((reservation) => ({
+                        value={reservations.map((reservation, index) => ({
                             ...reservation,
+                            index: index,
                             locationName: reservation.location.name,
                             vendorName: reservation.vendor.name,
                             authorName: reservation.author.name,
@@ -122,6 +123,7 @@ export default function ReservationsList() {
                                 <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${reservation.id}/generate-certificate`}>🟧</a> :
                                 <a href={`/reservations/complete/${reservation.id}`}>🟦</a>,
                         }))} size="small" stripedRows showGridlines>
+                        <Column field="index" header="No." body={(rowData) => rowData.index + 1} />
                         <Column field="reserved_at" header="접수일" />
                         <Column field="completed_at" header="완료일" />
                         <Column field="vendorName" header="업체" />

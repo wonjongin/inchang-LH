@@ -4,3 +4,14 @@
   padding: 2rem;
   text-align: center;
 } */
+
+.p-datepicker-prev,
+.p-datepicker-next {
+  width: 2rem !important;
+  height: 2rem !important;
+}
+
+.p-datepicker-prev .p-datepicker-prev-icon,
+.p-datepicker-next .p-datepicker-next-icon {
+  font-size: 1rem !important;
+}
