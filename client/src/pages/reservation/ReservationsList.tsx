@@ -13,15 +13,26 @@ import { useUsers } from "../../stores/useUsers";
 
 const styles = stylex.create({
     page: {
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
     },
     content: {
-      flex: 1,
-      padding: '2rem',
+        flex: 1,
+        padding: '2rem',
     },
-  })
+    controlsContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        gap: '0.5rem',
+        '@media (max-width: 768px)': {
+            flexDirection: 'column',
+            alignItems: 'stretch',
+        }
+    },
+})
 
 export default function ReservationsList() {
     const { reservations, loading, error, fetchReservationsByMonth, deleteReservation } = useReservations()
@@ -50,9 +61,9 @@ export default function ReservationsList() {
     return (
         <div {...stylex.props(styles.page)}>
             <Navbar />
-                <div {...stylex.props(styles.content)}>
+            <div {...stylex.props(styles.content)}>
                 <h1>접수 목록</h1>
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem' }}>
+                <div {...stylex.props(styles.controlsContainer)}>
                     <div className="p-inputgroup" style={{ width: '300px' }}>
                         <Button icon="pi pi-chevron-left" onClick={() => {
                             if (month > 1) {
@@ -76,57 +87,62 @@ export default function ReservationsList() {
                         }} />
                     </div>
                     <SelectButton
-                        value={selectedStatus} 
-                        onChange={(e) => setSelectedStatus(e.value)} 
-                        options={selectedStatusOptions} 
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.value)}
+                        options={selectedStatusOptions}
                         style={{ width: '170px' }}
                     />
                     <Button icon="pi pi-plus" label="접수 등록" onClick={() => navigate('/reservations/new')} />
                 </div>
                 <br />
                 {loading ? <Loading /> : (
-                <DataTable 
-                  resizableColumns
-                  selectionMode="single"
-                  value={reservations.map((reservation) => ({
-                    ...reservation,
-                    locationName: reservation.location.name,
-                    vendorName: reservation.vendor.name,
-                    authorName: reservation.author.name,
-                    edit: <a href={`/reservations/edit/${reservation.id}`}>📝</a>,
-                    delete: <a href={`/reservations/delete/${reservation.id}`} onClick={(e) => {
-                        e.preventDefault()
-                        if (confirm('정말 삭제하시겠습니까?')) {
-                            deleteReservation(reservation.id)
-                                .then(() => {
-                                    alert('접수 삭제가 완료되었습니다.')
-                                    fetchReservationsByMonth(year, month, selectedStatus)
-                                })
-                                .catch((error) => {
-                                    alert(error.message)
-                                })
-                        }
-                    }}>🗑️</a>,
-                    complete: reservation.completed_at ? 
-                        <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${reservation.id}/generate-certificate`}>🟧</a> : 
-                        <a href={`/reservations/complete/${reservation.id}`}>🟦</a>,
-                }))} size="small" stripedRows showGridlines>
-                    <Column field="reserved_at" header="접수일" />
-                    <Column field="completed_at" header="완료일" />
-                    <Column field="vendorName" header="업체" />
-                    <Column field="cotis" header="COTIS" />
-                    <Column field="locationName" header="단지" />
-                    <Column field="description" header="접수 내용" />
-                    {/* <Column field="authorName" header="작성자" /> */}
-                    <Column field="is_transfered" header="이관" body={(rowData) => rowData.is_transfered ? 'Y' : 'N'} />
-                    <Column field="reservation_photo" header="접문" align="center" body={(rowData) => <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${rowData.id}/reservation-photo`} download={true}>📷</a>} />
-                    <Column field="generate_certificate_template" header="양식" align="center" body={(rowData) => <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${rowData.id}/generate-certificate-template`} download={true}>🖨️</a>} />
-                    <Column field="complete" header="완료" align="center" />
-                    <Column field="edit" header="수정" align="center" />
-                    {me?.permission === 1 && (
-                        <Column field="delete" header="삭제" align="center" />
-                    )}
-                </DataTable> )}
+                    <DataTable
+                        resizableColumns
+                        selectionMode="single"
+                        value={reservations.map((reservation) => ({
+                            ...reservation,
+                            locationName: reservation.location.name,
+                            vendorName: reservation.vendor.name,
+                            authorName: reservation.author.name,
+                            edit: <a href={`/reservations/edit/${reservation.id}`}>📝</a>,
+                            delete: <a href={`/reservations/delete/${reservation.id}`} onClick={(e) => {
+                                e.preventDefault()
+                                if (confirm('정말 삭제하시겠습니까?')) {
+                                    deleteReservation(reservation.id)
+                                        .then(() => {
+                                            alert('접수 삭제가 완료되었습니다.')
+                                            fetchReservationsByMonth(year, month, selectedStatus)
+                                        })
+                                        .catch((error) => {
+                                            alert(error.message)
+                                        })
+                                }
+                            }}>🗑️</a>,
+                            complete: reservation.completed_at ?
+                                <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${reservation.id}/generate-certificate`}>🟧</a> :
+                                <a href={`/reservations/complete/${reservation.id}`}>🟦</a>,
+                        }))} size="small" stripedRows showGridlines>
+                        <Column field="reserved_at" header="접수일" />
+                        <Column field="completed_at" header="완료일" />
+                        <Column field="vendorName" header="업체" />
+                        <Column field="cotis" header="COTIS" />
+                        <Column field="locationName" header="단지" />
+                        <Column
+                            field="description"
+                            header="접수 내용"
+                            body={(rowData) => (rowData.description)}
+                            bodyStyle={{ minWidth: '200px', maxWidth: '600px', overflow: 'inherit', textOverflow: 'inherit', whiteSpace: 'inherit' }}
+                        />
+                        {/* <Column field="authorName" header="작성자" /> */}
+                        <Column field="is_transfered" header="이관" body={(rowData) => rowData.is_transfered ? 'Y' : 'N'} />
+                        <Column field="reservation_photo" header="접문" align="center" body={(rowData) => <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${rowData.id}/reservation-photo`} download={true}>📷</a>} />
+                        <Column field="generate_certificate_template" header="양식" align="center" body={(rowData) => <a href={`${import.meta.env.VITE_API_URL}/api/v1/reservations/${rowData.id}/generate-certificate-template`} download={true}>🖨️</a>} />
+                        <Column field="complete" header="완료" align="center" />
+                        <Column field="edit" header="수정" align="center" />
+                        {me?.permission === 1 && (
+                            <Column field="delete" header="삭제" align="center" />
+                        )}
+                    </DataTable>)}
             </div>
         </div>
     )

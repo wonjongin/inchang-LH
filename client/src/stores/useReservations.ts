@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { apiGetWithAuth, apiDeleteWithAuth, apiPostWithAuthFormData, apiPutWithAuthFormData   } from '../services/apiService'
+import { apiGetWithAuth, apiDeleteWithAuth, apiPostWithAuthFormData, apiPutWithAuthFormData } from '../services/apiService'
 
 export interface Reservation {
   id: number
@@ -41,7 +41,7 @@ interface ReservationsState {
   selectedReservation: Reservation | null
   loading: boolean
   error: string | null
-  
+
   // Actions
   fetchReservations: (skip?: number, limit?: number, filters?: { user_id?: number, complex_id?: number, vendor_id?: number }, filter?: string) => Promise<void>
   fetchReservationsByMonth: (year: number, month: number, filter?: string) => Promise<void>
@@ -77,9 +77,9 @@ export const useReservations = create<ReservationsState>((set) => ({
         set({ error: response.message || '접수 목록을 불러오는데 실패했습니다.', loading: false })
       }
     } catch (error: any) {
-      set({ 
-        error: error.response?.data?.detail || '서버에 연결할 수 없습니다.', 
-        loading: false 
+      set({
+        error: error.response?.data?.detail || '서버에 연결할 수 없습니다.',
+        loading: false
       })
     }
   },
@@ -94,9 +94,9 @@ export const useReservations = create<ReservationsState>((set) => ({
         set({ error: response.message || '월별 접수 목록을 불러오는데 실패했습니다.', loading: false })
       }
     } catch (error: any) {
-      set({ 
-        error: error.response?.data?.detail || '서버에 연결할 수 없습니다.', 
-        loading: false 
+      set({
+        error: error.response?.data?.detail || '서버에 연결할 수 없습니다.',
+        loading: false
       })
     }
   },
@@ -111,9 +111,9 @@ export const useReservations = create<ReservationsState>((set) => ({
         set({ error: response.message || '접수 정보를 불러오는데 실패했습니다.', loading: false })
       }
     } catch (error: any) {
-      set({ 
-        error: error.response?.data?.detail || '서버에 연결할 수 없습니다.', 
-        loading: false 
+      set({
+        error: error.response?.data?.detail || '서버에 연결할 수 없습니다.',
+        loading: false
       })
     }
   },
@@ -128,9 +128,9 @@ export const useReservations = create<ReservationsState>((set) => ({
         set({ error: response.message || '검색에 실패했습니다.', loading: false })
       }
     } catch (error: any) {
-      set({ 
-        error: error.response?.data?.detail || '서버에 연결할 수 없습니다.', 
-        loading: false 
+      set({
+        error: error.response?.data?.detail || '서버에 연결할 수 없습니다.',
+        loading: false
       })
     }
   },
@@ -150,9 +150,9 @@ export const useReservations = create<ReservationsState>((set) => ({
       const response = await apiPostWithAuthFormData('/api/v1/reservations', formData)
       if (response.success) {
         const newReservation = response.data
-        set((state) => ({ 
-          reservations: [...state.reservations, newReservation], 
-          loading: false 
+        set((state) => ({
+          reservations: [...state.reservations, newReservation],
+          loading: false
         }))
       } else {
         set({ error: response.message || '접수 생성에 실패했습니다.', loading: false })
@@ -171,7 +171,7 @@ export const useReservations = create<ReservationsState>((set) => ({
       const formData = new FormData()
       if (reservation.cotis) formData.append('cotis', reservation.cotis)
       if (reservation.reserved_at) formData.append('reserved_at', reservation.reserved_at)
-      if (reservation.is_transfered) formData.append('is_transfered', reservation.is_transfered.toString())
+      if (reservation.is_transfered !== undefined) formData.append('is_transfered', reservation.is_transfered.toString())
       if (reservation.description) formData.append('description', reservation.description)
       if (reservation.location) formData.append('location', reservation.location.toString())
       if (reservation.vendor) formData.append('vendor', reservation.vendor.toString())
