@@ -55,7 +55,9 @@ def get_reservations(
     elif filter == 'completed':
         query = query.filter(Reservation.completed_at != None)
 
-    return query.order_by(Reservation.cotis.desc()).offset(skip).limit(limit).all()
+    total = query.count()
+    items = query.order_by(Reservation.cotis.desc()).offset(skip).limit(limit).all()
+    return items, total
 
 
 def get_reservations_by_month(db: Session, year: int, month: int, filter: Optional[str] = None) -> List[Reservation]:

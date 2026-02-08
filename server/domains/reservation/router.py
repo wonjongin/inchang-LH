@@ -7,7 +7,7 @@ from pathlib import Path
 import os
 import shutil
 from db.database import get_db
-from schemas.common import CommonResponse
+from schemas.common import CommonResponse, PaginatedResponse
 from .schema import ReservationCreate, ReservationUpdate, ReservationResponse
 from . import crud
 from models.models import Permission, User
@@ -18,17 +18,17 @@ from .util import get_color_by_int, year_to_yearcode, exists_reservation_photo
 router = APIRouter()
 
 
-@router.get("/", response_model=CommonResponse[List[ReservationResponse]])
+@router.get("/", response_model=CommonResponse[PaginatedResponse[ReservationResponse]])
 async def get_reservations(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 30,
     filter: Optional[str] = None,
     user_id: Optional[int] = None,
     complex_id: Optional[int] = None,
     vendor_id: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
-    reservations = crud.get_reservations(
+    reservations, total = crud.get_reservations(
         db,
         skip=skip,
         limit=limit,
@@ -37,7 +37,14 @@ async def get_reservations(
         complex_id=complex_id,
         vendor_id=vendor_id
     )
-    return CommonResponse(data=[ReservationResponse.model_validate(r) for r in reservations])
+    return CommonResponse(
+        data=PaginatedResponse.create(
+            items=[ReservationResponse.model_validate(r) for r in reservations],
+            total=total,
+            page=(skip // limit) + 1,
+            limit=limit
+        )
+    )
 
 
 @router.get("/by-month/{year}/{month}", response_model=CommonResponse[List[ReservationResponse]])

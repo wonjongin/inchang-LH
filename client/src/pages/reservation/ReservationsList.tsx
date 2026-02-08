@@ -6,10 +6,10 @@ import { useEffect, useState } from "react";
 import { Column } from "primereact/column";
 import Loading from "../../components/Loading";
 import { SelectButton } from "primereact/selectbutton";
-import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 import { useUsers } from "../../stores/useUsers";
+import { Paginator } from "primereact/paginator";
 
 const styles = stylex.create({
     page: {
@@ -35,11 +35,13 @@ const styles = stylex.create({
 })
 
 export default function ReservationsList() {
-    const { reservations, loading, error, fetchReservationsByMonth, deleteReservation } = useReservations()
+    const { reservations, loading, error, totalRecords, fetchReservations, deleteReservation } = useReservations()
     const { me, fetchMe } = useUsers()
     const [selectedStatus, setSelectedStatus] = useState('all')
-    const [year, setYear] = useState(new Date().getFullYear())
-    const [month, setMonth] = useState(new Date().getMonth() + 1)
+    const [page, setPage] = useState(1)
+    const [first, setFirst] = useState(0)
+    const rows = 30
+
     const selectedStatusOptions = [
         { label: '전체', value: 'all' },
         { label: '진행중', value: 'progressing' },
@@ -51,8 +53,8 @@ export default function ReservationsList() {
         fetchMe()
     }, [])
     useEffect(() => {
-        fetchReservationsByMonth(year, month, selectedStatus)
-    }, [selectedStatus, year, month])
+        fetchReservations((page - 1) * 30, 30, {}, selectedStatus)
+    }, [selectedStatus, page])
 
 
     if (error) {
@@ -64,7 +66,7 @@ export default function ReservationsList() {
             <div {...stylex.props(styles.content)}>
                 <h1>접수 목록</h1>
                 <div {...stylex.props(styles.controlsContainer)}>
-                    <div className="p-inputgroup" style={{ width: '300px' }}>
+                    {/* <div className="p-inputgroup" style={{ width: '300px' }}>
                         <Button icon="pi pi-chevron-left" onClick={() => {
                             if (month > 1) {
                                 setMonth(month - 1)
@@ -85,7 +87,16 @@ export default function ReservationsList() {
                                 setMonth(1)
                             }
                         }} />
-                    </div>
+                    </div>*/}
+                    <Paginator
+                        first={first}
+                        rows={rows}
+                        totalRecords={totalRecords}
+                        onPageChange={(e) => {
+                            setFirst(e.first)
+                            setPage((e.first / rows) + 1)
+                        }}
+                    />
                     <SelectButton
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.value)}
@@ -112,7 +123,7 @@ export default function ReservationsList() {
                                     deleteReservation(reservation.id)
                                         .then(() => {
                                             alert('접수 삭제가 완료되었습니다.')
-                                            fetchReservationsByMonth(year, month, selectedStatus)
+                                            fetchReservations((page - 1) * rows, rows, {}, selectedStatus)
                                         })
                                         .catch((error) => {
                                             alert(error.message)

@@ -41,6 +41,7 @@ interface ReservationsState {
   selectedReservation: Reservation | null
   loading: boolean
   error: string | null
+  totalRecords: number
 
   // Actions
   fetchReservations: (skip?: number, limit?: number, filters?: { user_id?: number, complex_id?: number, vendor_id?: number }, filter?: string) => Promise<void>
@@ -59,6 +60,7 @@ export const useReservations = create<ReservationsState>((set) => ({
   selectedReservation: null,
   loading: false,
   error: null,
+  totalRecords: 0,
 
   fetchReservations: async (skip = 0, limit = 100, filters = {}, filter = 'all') => {
     set({ loading: true, error: null })
@@ -72,7 +74,7 @@ export const useReservations = create<ReservationsState>((set) => ({
       const response = await apiGetWithAuth('/api/v1/reservations', params)
       console.log('fetchReservations', response)
       if (response.success) {
-        set({ reservations: response.data, loading: false })
+        set({ reservations: response.data.items, totalRecords: response.data.total, loading: false })
       } else {
         set({ error: response.message || '접수 목록을 불러오는데 실패했습니다.', loading: false })
       }
