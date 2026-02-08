@@ -88,7 +88,7 @@ export default function ReservationsNew() {
                     mask="999999-99-99999"
                     style={{ width: '100%', maxWidth: 'none' }}
                     invalid={!!validateCotisWithMessage(formData.cotis || '')}
-                    required
+                    required={false}
                 />
             ),
         },
@@ -155,7 +155,7 @@ export default function ReservationsNew() {
                 <Calendar
                     id="reserved_at"
                     value={formData.reserved_at ? new Date(formData.reserved_at) : null}
-                    onChange={(e) => setFormData({ ...formData, reserved_at: e.value ? e.value.toISOString().split('T')[0] : '' })}
+                    onChange={(e) => setFormData({ ...formData, reserved_at: e.value?.toLocaleDateString('sv') || '' })}
                     dateFormat="yy-mm-dd"
                     placeholder="접수일을 선택하세요"
                     locale="ko"
