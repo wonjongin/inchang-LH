@@ -37,6 +37,8 @@ async def get_reservations(
         complex_id=complex_id,
         vendor_id=vendor_id
     )
+    for reservation in reservations:
+        reservation.exists_reservation_photo = exists_reservation_photo(reservation.id)
     return CommonResponse(
         data=PaginatedResponse.create(
             items=[ReservationResponse.model_validate(r) for r in reservations],
@@ -74,6 +76,8 @@ async def get_reservation_by_cotis(cotis: str, db: Session = Depends(get_db)):
 @router.get("/search/{query}", response_model=CommonResponse[PaginatedResponse[ReservationResponse]])
 async def search_reservations(query: str, skip: int = 0, limit: int = 30, db: Session = Depends(get_db)):
     reservations, total = crud.search_reservations(db, query=query, skip=skip, limit=limit)
+    for reservation in reservations:
+        reservation.exists_reservation_photo = exists_reservation_photo(reservation.id)
     return CommonResponse(data=PaginatedResponse.create(
         items=[ReservationResponse.model_validate(r) for r in reservations],
         total=total,
