@@ -62,7 +62,7 @@ export default function ReservationsList() {
         if (query.length > 0) {
             searchReservations(query)
         } else {
-            fetchReservations()
+            fetchReservations((page - 1) * 30, 30, {}, selectedStatus)
         }
     }
 
