@@ -77,7 +77,7 @@ class Reservation(Base):
     __tablename__ = "reservation"
     
     id = Column(Integer, primary_key=True)
-    cotis = Column(String, unique=True, nullable=False)
+    cotis = Column(String, unique=True, nullable=True)
     complex_id = Column(Integer, ForeignKey("complex.id"), nullable=False)
     vendor_id = Column(Integer, ForeignKey("vendor.id"), nullable=False)
     template_id = Column(Integer, ForeignKey("template.id"), nullable=True)

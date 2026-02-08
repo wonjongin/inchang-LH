@@ -72,7 +72,7 @@ async def search_reservations(query: str, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=CommonResponse[ReservationResponse], status_code=status.HTTP_201_CREATED)
 async def create_reservation(
-    cotis: str = Form(...),
+    cotis: Optional[str] = Form(None),
     reserved_at: date = Form(...),
     is_transfered: bool = Form(...),
     description: Optional[str] = Form(None),
@@ -83,9 +83,10 @@ async def create_reservation(
     db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_user)):
     # COTIS 중복 체크
-    existing = crud.get_reservation_by_cotis(db, cotis=cotis)
-    if existing:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="COTIS 번호가 이미 존재합니다.")
+    if cotis:
+        existing = crud.get_reservation_by_cotis(db, cotis=cotis)
+        if existing:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="COTIS 번호가 이미 존재합니다.")
     
     # 관련 엔티티 존재 확인
     from domains.complex import crud as complex_crud
@@ -147,7 +148,7 @@ async def update_reservation(
     }
     
     # COTIS 중복 체크 (다른 예약과 중복되지 않는지)
-    if 'cotis' in update_data:
+    if 'cotis' in update_data and update_data['cotis']:
         existing = crud.get_reservation_by_cotis(db, cotis=update_data['cotis'])
         if existing and existing.id != reservation_id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="COTIS already exists")

@@ -8,7 +8,7 @@ from domains.template.schema import TemplateResponse
 
 
 class ReservationBase(BaseModel):
-    cotis: str
+    cotis: Optional[str] = None
     reserved_at: date
     is_transfered: bool = False
     description: Optional[str] = None
