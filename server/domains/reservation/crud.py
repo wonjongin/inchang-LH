@@ -56,7 +56,7 @@ def get_reservations(
         query = query.filter(Reservation.completed_at != None)
 
     total = query.count()
-    items = query.order_by(Reservation.cotis.desc()).offset(skip).limit(limit).all()
+    items = query.order_by(Reservation.reserved_at.desc()).offset(skip).limit(limit).all()
     return items, total
 
 
