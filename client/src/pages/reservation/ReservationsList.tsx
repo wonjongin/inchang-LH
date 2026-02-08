@@ -10,6 +10,7 @@ import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 import { useUsers } from "../../stores/useUsers";
 import { Paginator } from "primereact/paginator";
+import { InputText } from "primereact/inputtext";
 
 const styles = stylex.create({
     page: {
@@ -35,11 +36,12 @@ const styles = stylex.create({
 })
 
 export default function ReservationsList() {
-    const { reservations, loading, error, totalRecords, fetchReservations, deleteReservation } = useReservations()
+    const { reservations, loading, error, totalRecords, fetchReservations, deleteReservation, searchReservations } = useReservations()
     const { me, fetchMe } = useUsers()
     const [selectedStatus, setSelectedStatus] = useState('all')
     const [page, setPage] = useState(1)
     const [first, setFirst] = useState(0)
+    const [query, setQuery] = useState('')
     const rows = 30
 
     const selectedStatusOptions = [
@@ -56,6 +58,13 @@ export default function ReservationsList() {
         fetchReservations((page - 1) * 30, 30, {}, selectedStatus)
     }, [selectedStatus, page])
 
+    const handleSearch = () => {
+        if (query.length > 0) {
+            searchReservations(query)
+        } else {
+            fetchReservations()
+        }
+    }
 
     if (error) {
         return <div>Error: {error}</div>
@@ -97,6 +106,14 @@ export default function ReservationsList() {
                             setPage((e.first / rows) + 1)
                         }}
                     />
+                    <div className="p-inputgroup" style={{ width: '300px' }}>
+                        <InputText placeholder="검색" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleSearch()
+                            }
+                        }} />
+                        <Button icon="pi pi-search" onClick={handleSearch} />
+                    </div>
                     <SelectButton
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.value)}

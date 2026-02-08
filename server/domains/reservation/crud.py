@@ -104,7 +104,7 @@ def search_reservations(db: Session, query: str) -> List[Reservation]:
             Reservation.description.ilike(f"%{query}%"),
             Reservation.cotis.ilike(f"%{query}%")
         )
-    ).order_by(Reservation.cotis.asc()).all()
+    ).order_by(Reservation.reserved_at.desc()).all()
 
 def update_reservation(db: Session, reservation_id: int, **kwargs) -> Optional[Reservation]:
     from datetime import datetime, date
