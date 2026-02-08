@@ -71,10 +71,15 @@ async def get_reservation_by_cotis(cotis: str, db: Session = Depends(get_db)):
     return CommonResponse(data=ReservationResponse.model_validate(reservation))
 
 
-@router.get("/search/{query}", response_model=CommonResponse[List[ReservationResponse]])
-async def search_reservations(query: str, db: Session = Depends(get_db)):
-    reservations = crud.search_reservations(db, query=query)
-    return CommonResponse(data=[ReservationResponse.model_validate(r) for r in reservations])
+@router.get("/search/{query}", response_model=CommonResponse[PaginatedResponse[ReservationResponse]])
+async def search_reservations(query: str, skip: int = 0, limit: int = 30, db: Session = Depends(get_db)):
+    reservations, total = crud.search_reservations(db, query=query, skip=skip, limit=limit)
+    return CommonResponse(data=PaginatedResponse.create(
+        items=[ReservationResponse.model_validate(r) for r in reservations],
+        total=total,
+        page=(skip // limit) + 1,
+        limit=limit
+    ))
 
 
 @router.post("/", response_model=CommonResponse[ReservationResponse], status_code=status.HTTP_201_CREATED)

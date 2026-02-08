@@ -125,7 +125,7 @@ export const useReservations = create<ReservationsState>((set) => ({
     try {
       const response = await apiGetWithAuth(`/api/v1/reservations/search/${query}`)
       if (response.success) {
-        set({ reservations: response.data, loading: false })
+        set({ reservations: response.data.items, totalRecords: response.data.total, loading: false })
       } else {
         set({ error: response.message || '검색에 실패했습니다.', loading: false })
       }

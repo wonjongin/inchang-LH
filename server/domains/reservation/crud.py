@@ -89,11 +89,11 @@ def get_reservations_by_year(db: Session, year: int) -> List[Reservation]:
         extract('year', Reservation.reserved_at) == year
     ).order_by(Reservation.reserved_at.asc()).all()
 
-def search_reservations(db: Session, query: str) -> List[Reservation]:
+def search_reservations(db: Session, query: str, skip: int = 0, limit: int = 30) -> List[Reservation]:
     """예약 검색 (단지명, 벤더명, 설명으로 검색)"""
     from sqlalchemy import or_
     
-    return db.query(Reservation).join(
+    items = db.query(Reservation).join(
         Complex, Reservation.complex_id == Complex.id
     ).join(
         Vendor, Reservation.vendor_id == Vendor.id
@@ -104,7 +104,20 @@ def search_reservations(db: Session, query: str) -> List[Reservation]:
             Reservation.description.ilike(f"%{query}%"),
             Reservation.cotis.ilike(f"%{query}%")
         )
-    ).order_by(Reservation.reserved_at.desc()).all()
+    ).order_by(Reservation.reserved_at.desc()).offset(skip).limit(limit).all()
+    total = db.query(Reservation).join(
+        Complex, Reservation.complex_id == Complex.id
+    ).join(
+        Vendor, Reservation.vendor_id == Vendor.id
+    ).filter(
+        or_(
+            Complex.name.ilike(f"%{query}%"),
+            Vendor.name.ilike(f"%{query}%"),
+            Reservation.description.ilike(f"%{query}%"),
+            Reservation.cotis.ilike(f"%{query}%")
+        )
+    ).count()
+    return items, total
 
 def update_reservation(db: Session, reservation_id: int, **kwargs) -> Optional[Reservation]:
     from datetime import datetime, date
