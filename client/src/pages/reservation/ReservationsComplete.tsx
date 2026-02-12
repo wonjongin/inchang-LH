@@ -28,16 +28,16 @@ export default function ReservationsComplete() {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        
+
         if (!completedAt && !selectedFile) {
             alert('완료일 또는 완료확인서 파일을 입력해주세요.')
             return
         }
-        
+
         // FormData 생성
         const formData = new FormData()
         if (completedAt) {
-            formData.append('completed_at', completedAt.toISOString().split('T')[0])
+            formData.append('completed_at', completedAt.toLocaleDateString('sv'))
         }
         if (selectedFile) {
             formData.append('certificate', selectedFile)
@@ -56,22 +56,22 @@ export default function ReservationsComplete() {
             },
             body: formData
         })
-        .then(async (response) => {
-            const data = await response.json()
-            if (!response.ok) {
-                throw new Error(data.detail || data.message || '접수 완료 처리에 실패했습니다.')
-            }
-            if (data.success) {
-                alert('접수 완료 처리가 완료되었습니다.')
-                navigate('/reservations/list')
-            } else {
-                throw new Error(data.message || '접수 완료 처리에 실패했습니다.')
-            }
-        })
-        .catch((error) => {
-            console.log(error)
-            alert(error.message || '서버에 연결할 수 없습니다.')
-        })
+            .then(async (response) => {
+                const data = await response.json()
+                if (!response.ok) {
+                    throw new Error(data.detail || data.message || '접수 완료 처리에 실패했습니다.')
+                }
+                if (data.success) {
+                    alert('접수 완료 처리가 완료되었습니다.')
+                    navigate('/reservations/list')
+                } else {
+                    throw new Error(data.message || '접수 완료 처리에 실패했습니다.')
+                }
+            })
+            .catch((error) => {
+                console.log(error)
+                alert(error.message || '서버에 연결할 수 없습니다.')
+            })
     }
 
     const fields: FormField[] = [
@@ -79,13 +79,13 @@ export default function ReservationsComplete() {
             label: '완료일',
             id: 'completed_at',
             input: (
-                <Calendar 
+                <Calendar
                     id="completed_at"
                     value={completedAt}
-                    onChange={(e) => setCompletedAt(e.value as Date | null)} 
+                    onChange={(e) => setCompletedAt(e.value as Date | null)}
                     dateFormat="yy-mm-dd"
                     placeholder="완료일을 선택하세요"
-                    className="w-full" 
+                    className="w-full"
                     style={{ width: '100%', maxWidth: 'none' }}
                     showIcon
                 />
@@ -95,7 +95,7 @@ export default function ReservationsComplete() {
             label: '완료확인서',
             id: 'certificate',
             input: (
-                <FileUpload 
+                <FileUpload
                     mode="basic"
                     accept=".pdf"
                     maxFileSize={20000000}
@@ -125,7 +125,7 @@ export default function ReservationsComplete() {
                         <p><strong>접수일:</strong> {selectedReservation.reserved_at}</p>
                     </div>
                 )}
-                <FormBasic 
+                <FormBasic
                     fields={fields}
                     onSubmit={handleSubmit}
                     submitButton={{
