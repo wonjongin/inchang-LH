@@ -333,7 +333,7 @@ async def get_reservations_by_year(year: int, db: Session = Depends(get_db)) -> 
     
     for i, reservation in enumerate(reservations, start=2):
         if not reservation.is_transfered:
-            fill_color = PatternFill(start_color=get_color_by_int(i), end_color=get_color_by_int(i), fill_type="solid")
+            fill_color = PatternFill(start_color=get_color_by_int(reservation.vendor_id), end_color=get_color_by_int(reservation.vendor_id), fill_type="solid")
         else:
             fill_color = PatternFill(start_color="A6A6A6", end_color="A6A6A6", fill_type="solid")
         sheet.cell(row=i, column=1, value=reservation.reserved_at.strftime('%Y-%m-%d')).fill = fill_color
