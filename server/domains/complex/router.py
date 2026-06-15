@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from core.security import get_current_user
+from core.config import settings
 from models.models import Permission, User
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import httpx
 from db.database import get_db
 from schemas.common import CommonResponse
-from .schema import ComplexCreate, ComplexUpdate, ComplexResponse, ComplexPaginatedResponse, ComplexQuickSearchResponse
+from .schema import ComplexCreate, ComplexUpdate, ComplexResponse, ComplexPaginatedResponse, ComplexQuickSearchResponse, CoordinatesResponse
 from . import crud
 
 router = APIRouter()
@@ -39,6 +41,49 @@ async def search_complexes(query: str, skip: int = 0, limit: int = 100, db: Sess
         limit=limit,
         pages=crud.get_complexes_count_by_query(db, query) // 100 + 1
     )))
+
+@router.get("/{complex_id}/coordinates", response_model=CommonResponse[CoordinatesResponse])
+async def get_complex_coordinates(complex_id: int, db: Session = Depends(get_db)):
+    complex = crud.get_complex(db, complex_id=complex_id)
+    if not complex:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complex not found")
+
+    if complex.lat is not None and complex.lon is not None:
+        return CommonResponse(data=CoordinatesResponse(lat=complex.lat, lon=complex.lon))
+
+    if not complex.address:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="단지 주소가 등록되어 있지 않습니다.")
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            "https://apis.openapi.sk.com/tmap/geo/fullAddrGeo",
+            params={
+                "addressFlag": "F00",
+                "coordType": "WGS84GEO",
+                "version": "1",
+                "format": "json",
+                "fullAddr": complex.address,
+                "appKey": settings.TMAP_API_KEY,
+            },
+        )
+
+    if resp.status_code != 200:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="좌표 변환 API 오류")
+
+    coordinates = resp.json().get("coordinateInfo", {}).get("coordinate", [])
+    if not coordinates:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="주소에 해당하는 좌표를 찾을 수 없습니다.")
+
+    coord = coordinates[0]
+    lat = float(coord.get("newLat") or coord.get("lat") or 0)
+    lon = float(coord.get("newLon") or coord.get("lon") or 0)
+
+    if not lat or not lon:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="좌표 값을 파싱할 수 없습니다.")
+
+    crud.save_coordinates(db, complex_id=complex_id, lat=lat, lon=lon)
+    return CommonResponse(data=CoordinatesResponse(lat=lat, lon=lon))
+
 
 @router.get("/{complex_id}", response_model=CommonResponse[ComplexResponse])
 async def get_complex(complex_id: int, db: Session = Depends(get_db)):

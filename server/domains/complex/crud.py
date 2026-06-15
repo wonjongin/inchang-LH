@@ -47,6 +47,17 @@ def update_complex(db: Session, complex_id: int, **kwargs) -> Optional[Complex]:
     return db_complex
 
 
+def save_coordinates(db: Session, complex_id: int, lat: float, lon: float) -> Optional[Complex]:
+    db_complex = get_complex(db, complex_id)
+    if not db_complex:
+        return None
+    db_complex.lat = lat
+    db_complex.lon = lon
+    db.commit()
+    db.refresh(db_complex)
+    return db_complex
+
+
 def delete_complex(db: Session, complex_id: int) -> bool:
     db_complex = get_complex(db, complex_id)
     if not db_complex:

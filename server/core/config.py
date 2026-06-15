@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 30
     ADMIN_PW: str = "admin_pw"
     HOST_URL: str = "http://localhost:8000"
+    TMAP_API_KEY: str = ""
 
     class Config:
         env_file = ".env"

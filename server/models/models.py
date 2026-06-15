@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Boolean, Text, ForeignKey, ForeignKeyConstraint, DateTime
+from sqlalchemy import Column, Integer, String, Date, Boolean, Text, ForeignKey, ForeignKeyConstraint, DateTime, Float
 from sqlalchemy.orm import relationship
 from db.base import Base
 from datetime import datetime
@@ -34,9 +34,11 @@ class Complex(Base):
     tel = Column(String, nullable=True)
     fax = Column(String, nullable=True)
     email = Column(String, nullable=True)
+    lat = Column(Float, nullable=True)
+    lon = Column(Float, nullable=True)
     created_at = Column(DateTime, nullable=False, default=datetime.now)
     updated_at = Column(DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
-    
+
     # Relationships
     reservations = relationship("Reservation", back_populates="location")
 

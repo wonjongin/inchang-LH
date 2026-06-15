@@ -39,3 +39,7 @@ class ComplexQuickSearchResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class CoordinatesResponse(BaseModel):
+    lat: float
+    lon: float

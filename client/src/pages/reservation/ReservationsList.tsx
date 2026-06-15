@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useUsers } from "../../stores/useUsers";
 import { Paginator } from "primereact/paginator";
 import { InputText } from "primereact/inputtext";
+import { apiGetWithAuth } from "../../services/apiService";
 
 const styles = stylex.create({
     page: {
@@ -57,6 +58,20 @@ export default function ReservationsList() {
     useEffect(() => {
         fetchReservations((page - 1) * 30, 30, {}, selectedStatus)
     }, [selectedStatus, page])
+
+    const handleNavigateToComplex = async (complexId: number, complexName: string) => {
+        try {
+            const response = await apiGetWithAuth(`/api/v1/complexes/${complexId}/coordinates`)
+            if (response.success) {
+                const { lat, lon } = response.data
+                window.location.href = `tmap://route?goalname=${encodeURIComponent(complexName)}&goaly=${lat}&goalx=${lon}`
+            } else {
+                alert(response.message || '좌표를 가져올 수 없습니다.')
+            }
+        } catch (error: any) {
+            alert(error.response?.data?.detail || '좌표를 가져올 수 없습니다.')
+        }
+    }
 
     const handleSearch = () => {
         if (query.length > 0) {
@@ -156,7 +171,18 @@ export default function ReservationsList() {
                         <Column field="completed_at" header="완료일" />
                         <Column field="vendorName" header="업체" />
                         <Column field="cotis" header="COTIS" />
-                        <Column field="locationName" header="단지" />
+                        <Column
+                            field="locationName"
+                            header="단지"
+                            body={(rowData) => (
+                                <button
+                                    onClick={() => handleNavigateToComplex(rowData.location.id, rowData.location.name)}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', textDecoration: 'underline', padding: 0, fontSize: 'inherit' }}
+                                >
+                                    {rowData.locationName}
+                                </button>
+                            )}
+                        />
                         <Column
                             field="description"
                             header="접수 내용"
