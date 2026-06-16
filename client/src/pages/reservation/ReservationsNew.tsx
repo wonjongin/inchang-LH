@@ -28,6 +28,7 @@ export default function ReservationsNew() {
         cotis: '',
         reserved_at: '',
         is_transfered: false,
+        is_other_vendor: false,
         description: null,
         location: 0,
         location_name: '',
@@ -57,6 +58,7 @@ export default function ReservationsNew() {
             cotis: formData.cotis,
             reserved_at: formData.reserved_at,
             is_transfered: formData.is_transfered || false,
+            is_other_vendor: formData.is_other_vendor || false,
             description: formData.description || null,
             location: formData.location,
             vendor: formData.vendor,
@@ -174,6 +176,17 @@ export default function ReservationsNew() {
                     id="is_transfered"
                     checked={formData.is_transfered || false}
                     onChange={(e) => setFormData({ ...formData, is_transfered: e.checked || false })}
+                />
+            ),
+        },
+        {
+            label: '타업체처리',
+            id: 'is_other_vendor',
+            input: (
+                <Checkbox
+                    id="is_other_vendor"
+                    checked={formData.is_other_vendor || false}
+                    onChange={(e) => setFormData({ ...formData, is_other_vendor: e.checked || false })}
                 />
             ),
         },

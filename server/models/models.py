@@ -87,6 +87,7 @@ class Reservation(Base):
     reserved_at = Column(Date, nullable=False)
     completed_at = Column(Date, nullable=True)
     is_transfered = Column(Boolean, nullable=False, default=False)
+    is_other_vendor = Column(Boolean, nullable=False, default=False)
     description = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=False, default=datetime.now)
     updated_at = Column(DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)

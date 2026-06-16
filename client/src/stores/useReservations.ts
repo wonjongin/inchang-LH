@@ -7,6 +7,7 @@ export interface Reservation {
   reserved_at: string
   completed_at?: string | null
   is_transfered: boolean
+  is_other_vendor: boolean
   description?: string | null
   location: {
     id: number
@@ -30,6 +31,7 @@ export interface ReservationCreate {
   cotis: string
   reserved_at: string
   is_transfered?: boolean
+  is_other_vendor?: boolean
   description?: string | null
   location: number
   vendor: number
@@ -144,6 +146,7 @@ export const useReservations = create<ReservationsState>((set) => ({
       formData.append('cotis', reservation.cotis)
       formData.append('reserved_at', reservation.reserved_at)
       formData.append('is_transfered', reservation.is_transfered?.toString() || 'false')
+      formData.append('is_other_vendor', reservation.is_other_vendor?.toString() || 'false')
       formData.append('description', reservation.description || '')
       formData.append('location', reservation.location.toString())
       formData.append('vendor', reservation.vendor.toString())
@@ -174,6 +177,7 @@ export const useReservations = create<ReservationsState>((set) => ({
       if (reservation.cotis) formData.append('cotis', reservation.cotis)
       if (reservation.reserved_at) formData.append('reserved_at', reservation.reserved_at)
       if (reservation.is_transfered !== undefined) formData.append('is_transfered', reservation.is_transfered.toString())
+      if (reservation.is_other_vendor !== undefined) formData.append('is_other_vendor', reservation.is_other_vendor.toString())
       if (reservation.description) formData.append('description', reservation.description)
       if (reservation.location) formData.append('location', reservation.location.toString())
       if (reservation.vendor) formData.append('vendor', reservation.vendor.toString())

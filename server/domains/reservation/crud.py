@@ -15,6 +15,7 @@ def create_reservation(db: Session, reservation: ReservationCreate, user_id: int
         reserved_at=reservation.reserved_at,
         # completed_at=reservation.completed_at,
         is_transfered=reservation.is_transfered,
+        is_other_vendor=reservation.is_other_vendor,
         description=reservation.description
     )
     db.add(db_reservation)
@@ -151,8 +152,8 @@ def update_reservation(db: Session, reservation_id: int, **kwargs) -> Optional[R
                 pass  # 이미 date 객체
     
     # 외래 키 필드만 업데이트 (관계 필드가 아닌)
-    allowed_fields = ['cotis', 'complex_id', 'vendor_id', 'template_id', 'user_id', 
-                      'reserved_at', 'completed_at', 'is_transfered', 'description']
+    allowed_fields = ['cotis', 'complex_id', 'vendor_id', 'template_id', 'user_id',
+                      'reserved_at', 'completed_at', 'is_transfered', 'is_other_vendor', 'description']
     
     for key, value in kwargs.items():
         if key in allowed_fields:

@@ -28,6 +28,7 @@ export default function ReservationsEdit() {
         cotis: '',
         reserved_at: '',
         is_transfered: false,
+        is_other_vendor: false,
         description: null,
         location: 0,
         location_name: '',
@@ -53,6 +54,7 @@ export default function ReservationsEdit() {
                 cotis: selectedReservation.cotis,
                 reserved_at: selectedReservation.reserved_at,
                 is_transfered: selectedReservation.is_transfered || false,
+                is_other_vendor: selectedReservation.is_other_vendor || false,
                 description: selectedReservation.description || null,
                 location: selectedReservation.location.id,
                 location_name: selectedReservation.location.name,
@@ -78,6 +80,7 @@ export default function ReservationsEdit() {
             cotis: formData.cotis,
             reserved_at: formData.reserved_at,
             is_transfered: formData.is_transfered || false,
+            is_other_vendor: formData.is_other_vendor || false,
             description: formData.description || null,
             location: formData.location,
             vendor: formData.vendor,
@@ -210,6 +213,17 @@ export default function ReservationsEdit() {
                     id="is_transfered"
                     checked={formData.is_transfered || false}
                     onChange={(e) => setFormData({ ...formData, is_transfered: e.checked || false })}
+                />
+            ),
+        },
+        {
+            label: '타업체처리',
+            id: 'is_other_vendor',
+            input: (
+                <Checkbox
+                    id="is_other_vendor"
+                    checked={formData.is_other_vendor || false}
+                    onChange={(e) => setFormData({ ...formData, is_other_vendor: e.checked || false })}
                 />
             ),
         },

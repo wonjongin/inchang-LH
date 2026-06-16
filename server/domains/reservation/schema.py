@@ -11,6 +11,7 @@ class ReservationBase(BaseModel):
     cotis: Optional[str] = None
     reserved_at: date
     is_transfered: bool = False
+    is_other_vendor: bool = False
     description: Optional[str] = None
 
 class ReservationCreate(ReservationBase):
@@ -23,6 +24,7 @@ class ReservationUpdate(BaseModel):
     reserved_at: Optional[date] = None
     completed_at: Optional[date] = None
     is_transfered: Optional[bool] = None
+    is_other_vendor: Optional[bool] = None
     description: Optional[str] = None
     location: Optional[int] = None
     vendor: Optional[int] = None

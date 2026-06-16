@@ -91,12 +91,13 @@ async def create_reservation(
     cotis: Optional[str] = Form(None),
     reserved_at: date = Form(...),
     is_transfered: bool = Form(...),
+    is_other_vendor: bool = Form(False),
     description: Optional[str] = Form(None),
     location: int = Form(...),
     vendor: int = Form(...),
     template: Optional[int] = Form(None),
-    reservation_photo: Optional[UploadFile] = File(None), 
-    db: Session = Depends(get_db), 
+    reservation_photo: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     # COTIS 중복 체크
     if cotis:
@@ -125,7 +126,7 @@ async def create_reservation(
         if not template_obj:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="양식을 찾을 수 없습니다.")
 
-    db_reservation = crud.create_reservation(db=db, reservation=ReservationCreate(cotis=cotis, reserved_at=reserved_at, is_transfered=is_transfered, description=description, location=location, vendor=vendor, template=template_id), user_id=current_user.id)
+    db_reservation = crud.create_reservation(db=db, reservation=ReservationCreate(cotis=cotis, reserved_at=reserved_at, is_transfered=is_transfered, is_other_vendor=is_other_vendor, description=description, location=location, vendor=vendor, template=template_id), user_id=current_user.id)
 
     # PDF 파일 저장
     if reservation_photo and reservation_photo.filename:
@@ -146,6 +147,7 @@ async def update_reservation(
     cotis: Optional[str] = Form(None),
     reserved_at: Optional[date] = Form(None),
     is_transfered: Optional[bool] = Form(None),
+    is_other_vendor: Optional[bool] = Form(None),
     description: Optional[str] = Form(None),
     location: Optional[int] = Form(None),
     vendor: Optional[int] = Form(None),
@@ -157,6 +159,7 @@ async def update_reservation(
         'cotis': cotis,
         'reserved_at': reserved_at,
         'is_transfered': is_transfered,
+        'is_other_vendor': is_other_vendor,
         'description': description,
         'location': location,
         'vendor': vendor,
@@ -332,7 +335,7 @@ async def get_reservations_by_year(year: int, db: Session = Depends(get_db)) -> 
     sheet.cell(row=1, column=7, value="접수/작업내용")
     
     for i, reservation in enumerate(reservations, start=2):
-        if not reservation.is_transfered:
+        if not reservation.is_transfered and not reservation.is_other_vendor:
             fill_color = PatternFill(start_color=get_color_by_int(reservation.vendor_id), end_color=get_color_by_int(reservation.vendor_id), fill_type="solid")
         else:
             fill_color = PatternFill(start_color="A6A6A6", end_color="A6A6A6", fill_type="solid")
